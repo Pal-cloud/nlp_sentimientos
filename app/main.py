@@ -9,7 +9,7 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
-from utils import clean_text
+from utils import clean_text, classify_toxicity_type
 
 # ── Configuración de la página ────────────────────────────────────────────────
 st.set_page_config(
@@ -132,11 +132,11 @@ if model is None:
     )
     st.stop()
 
-# ── Tabs principales ──────────────────────────────────────────────────────────
-tab1, tab2 = st.tabs(["🔍 Análisis Individual", "📋 Análisis por Lotes"])
+# ── Sección principal ─────────────────────────────────────────────────────────
+tab1, = st.tabs(["🔍 Análisis Individual"])
 
 # ════════════════════════════════════════════════════════════════════════════════
-# TAB 1 — Análisis individual
+# Análisis individual
 # ════════════════════════════════════════════════════════════════════════════════
 with tab1:
     col_input, col_result = st.columns([1.2, 1], gap="large")
@@ -201,110 +201,51 @@ with tab1:
                         unsafe_allow_html=True,
                     )
 
-                st.metric(
-                    label="Confianza del modelo",
-                    value=f"{confidence * 100:.1f}%",
-                    help="Probabilidad estimada de que la clasificación sea correcta.",
+                # ── Tipo de toxicidad ──────────────────────────────────────
+                tox_type = classify_toxicity_type(user_text)
+
+                TYPE_CONFIG = {
+                    "machista":           {"icon": "⚧️",  "color": "#e040fb", "label": "Machista"},
+                    "racista":            {"icon": "🌍",  "color": "#ff6d00", "label": "Racista"},
+                    "sexual":             {"icon": "🔞",  "color": "#f50057", "label": "Sexual"},
+                    "insulto":            {"icon": "💢",  "color": "#ff4b4b", "label": "Insulto"},
+                    "lenguaje cotidiano": {"icon": "💬",  "color": "#90a4ae", "label": "Lenguaje cotidiano"},
+                }
+                cfg = TYPE_CONFIG[tox_type]
+
+                st.markdown(
+                    f"""
+                    <div style="
+                        background: {cfg['color']}22;
+                        border-left: 5px solid {cfg['color']};
+                        border-radius: 8px;
+                        padding: 14px 18px;
+                        margin-top: 12px;
+                    ">
+                        <p style="margin:0; font-size:13px; color:{cfg['color']}; font-weight:600; text-transform:uppercase; letter-spacing:1px;">
+                            Tipo de contenido detectado
+                        </p>
+                        <h3 style="margin:4px 0 0 0; color:{cfg['color']};">
+                            {cfg['icon']} {cfg['label']}
+                        </h3>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
                 )
 
-                # Gráfico de gauge simple con matplotlib
-                fig, ax = plt.subplots(figsize=(4, 0.5))
-                color = "#ff4b4b" if label == 1 else "#00c853"
-                ax.barh(0, confidence, color=color, height=0.4)
-                ax.barh(0, 1 - confidence, left=confidence, color="#e0e0e033", height=0.4)
-                ax.set_xlim(0, 1)
-                ax.set_ylim(-0.5, 0.5)
-                ax.axis("off")
-                fig.patch.set_alpha(0)
-                st.pyplot(fig, use_container_width=True)
-                plt.close(fig)
+                # Leyenda de tipos
+                with st.expander("ℹ️ ¿Qué significa cada tipo?"):
+                    st.markdown("""
+                    | Tipo | Descripción |
+                    |---|---|
+                    | ⚧️ **Machista** | Lenguaje sexista o discriminatorio hacia la mujer |
+                    | 🌍 **Racista** | Contenido basado en raza, etnia o nacionalidad |
+                    | 🔞 **Sexual** | Contenido sexual explícito o acoso sexual |
+                    | 💢 **Insulto** | Insultos directos, amenazas o lenguaje agresivo |
+                    | 💬 **Lenguaje cotidiano** | Sin categoría específica clara |
+                    """)
 
                 # Texto preprocesado
                 with st.expander("🔬 Ver texto preprocesado"):
                     cleaned = clean_text(user_text)
                     st.code(cleaned if cleaned else "(texto vacío tras preprocesamiento)", language=None)
-
-# ════════════════════════════════════════════════════════════════════════════════
-# TAB 2 — Análisis por lotes
-# ════════════════════════════════════════════════════════════════════════════════
-with tab2:
-    st.subheader("📋 Analiza múltiples comentarios a la vez")
-    st.markdown(
-        "Sube un archivo CSV con una columna llamada **`Text`** que contenga los comentarios a analizar."
-    )
-
-    uploaded_file = st.file_uploader(
-        "Sube tu CSV", type=["csv"], help="El archivo debe tener al menos una columna 'Text'."
-    )
-
-    if uploaded_file is not None:
-        try:
-            df_upload = pd.read_csv(uploaded_file)
-        except Exception as e:
-            st.error(f"Error al leer el archivo: {e}")
-            st.stop()
-
-        if "Text" not in df_upload.columns:
-            st.error("⚠️ El CSV debe contener una columna llamada **`Text`**.")
-        else:
-            st.success(f"✅ Archivo cargado: **{len(df_upload)} comentarios**.")
-
-            with st.spinner("Analizando todos los comentarios..."):
-                df_upload["Predicción"] = df_upload["Text"].apply(
-                    lambda t: "🚨 Tóxico" if predict(str(t), model, vectorizer)[0] == 1 else "✅ No tóxico"
-                )
-                df_upload["Confianza (%)"] = df_upload["Text"].apply(
-                    lambda t: round(predict(str(t), model, vectorizer)[1] * 100, 1)
-                )
-
-            # Estadísticas rápidas
-            n_toxic = (df_upload["Predicción"] == "🚨 Tóxico").sum()
-            n_safe = len(df_upload) - n_toxic
-
-            col_a, col_b, col_c = st.columns(3)
-            col_a.metric("Total comentarios", len(df_upload))
-            col_b.metric("🚨 Tóxicos", n_toxic)
-            col_c.metric("✅ No tóxicos", n_safe)
-
-            # Gráfico de distribución
-            fig2, ax2 = plt.subplots(figsize=(4, 3))
-            ax2.pie(
-                [n_safe, n_toxic],
-                labels=["No tóxico", "Tóxico"],
-                colors=["#00c853", "#ff4b4b"],
-                autopct="%1.1f%%",
-                startangle=90,
-                wedgeprops=dict(width=0.6),
-            )
-            ax2.set_title("Distribución de predicciones", fontsize=12)
-            fig2.patch.set_alpha(0)
-            st.pyplot(fig2, use_container_width=False)
-            plt.close(fig2)
-
-            # Tabla de resultados
-            st.subheader("Resultados detallados")
-            st.dataframe(
-                df_upload[["Text", "Predicción", "Confianza (%)"]],
-                use_container_width=True,
-                hide_index=True,
-            )
-
-            # Descarga de resultados
-            csv_result = df_upload.to_csv(index=False).encode("utf-8")
-            st.download_button(
-                label="⬇️ Descargar resultados CSV",
-                data=csv_result,
-                file_name="resultados_predicciones.csv",
-                mime="text/csv",
-                use_container_width=True,
-            )
-
-    else:
-        # Instrucciones y ejemplo de descarga
-        st.info(
-            "💡 **Formato esperado del CSV:**\n\n"
-            "```\nText\n"
-            "This video is great!\n"
-            "You are a terrible person.\n"
-            "I love this channel.\n```"
-        )
