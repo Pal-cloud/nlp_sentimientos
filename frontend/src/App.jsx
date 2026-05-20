@@ -10,12 +10,16 @@ import {
   History as HistoryIcon,
   BarChart as BarChartIcon,
   SmartToy as SmartToyIcon,
+  YouTube as YouTubeIcon,
+  Slideshow as SlideshowIcon,
 } from '@mui/icons-material';
-import { analyzeComment }       from './api';
-import { TYPE_CONFIG }          from './constants';
-import AnalyzeTab  from './components/AnalyzeTab';
-import HistoryTab  from './components/HistoryTab';
-import StatsTab    from './components/StatsTab';
+import { analyzeComment }      from './api';
+import { TYPE_CONFIG }         from './constants';
+import AnalyzeTab              from './components/AnalyzeTab';
+import HistoryTab              from './components/HistoryTab';
+import StatsTab                from './components/StatsTab';
+import UrlTab                  from './components/UrlTab';
+import PresentationTab         from './components/PresentationTab';
 
 const G_BLUE   = '#1a73e8';
 const G_RED    = '#ea4335';
@@ -25,9 +29,9 @@ const G_DOTS   = [G_BLUE, G_RED, G_YELLOW, G_GREEN];
 
 const HERO_CHIPS = [
   { emoji: '⚡', label: 'Análisis instantáneo', color: G_BLUE   },
-  { emoji: '�', label: 'Bilingüe ES / EN',      color: G_GREEN  },
-  { emoji: '�', label: 'ML Multiclase',         color: G_RED    },
-  { emoji: '�', label: '5 tipos detectados',    color: G_YELLOW },
+  { emoji: '🌍', label: 'Bilingüe ES / EN',      color: G_GREEN  },
+  { emoji: '🧠', label: 'ML Multiclase',         color: G_RED    },
+  { emoji: '📂', label: '5 tipos detectados',    color: G_YELLOW },
 ];
 
 function GDots() {
@@ -86,7 +90,8 @@ export default function App() {
             </Typography>
           </Box>
 
-          <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ flex: 1 }}>
+          <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ flex: 1 }}
+            variant="scrollable" scrollButtons="auto">
             <Tab icon={<SearchIcon fontSize="small" />} iconPosition="start" label="Análisis" />
             <Tab
               icon={<HistoryIcon fontSize="small" />}
@@ -102,6 +107,8 @@ export default function App() {
               }
             />
             <Tab icon={<BarChartIcon fontSize="small" />} iconPosition="start" label="Estadísticas" />
+            <Tab icon={<YouTubeIcon fontSize="small" />} iconPosition="start" label="Por vídeo" />
+            <Tab icon={<SlideshowIcon fontSize="small" />} iconPosition="start" label="Presentación" />
           </Tabs>
 
           <Chip
@@ -114,7 +121,7 @@ export default function App() {
         </Toolbar>
       </AppBar>
 
-      {/* ── Hero banner ── */}
+      {/* ── Hero banner (only on Análisis tab) ── */}
       <AnimatePresence>
         {tab === 0 && (
           <motion.div key="hero"
@@ -188,6 +195,8 @@ export default function App() {
                   onClear={() => { setHistory([]); setSnack({ severity: "info", msg: "Histórico limpiado" }); }} />
               )}
               {tab === 2 && <StatsTab history={history} />}
+              {tab === 3 && <UrlTab />}
+              {tab === 4 && <PresentationTab />}
             </motion.div>
           </AnimatePresence>
         </Container>
