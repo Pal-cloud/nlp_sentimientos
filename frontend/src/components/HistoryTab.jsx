@@ -1,21 +1,54 @@
 import { motion, AnimatePresence } from "framer-motion";
+import {
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  Button,
+  Chip,
+  Divider,
+  IconButton,
+  Tooltip,
+  Alert,
+} from "@mui/material";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import FileDownloadIcon from "@mui/icons-material/FileDownload";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import WarningAmberIcon from "@mui/icons-material/WarningAmber";
+import HistoryIcon from "@mui/icons-material/History";
 import { toast } from "react-hot-toast";
 
 export default function HistoryTab({ history, onClear }) {
   if (!history.length) {
     return (
       <motion.div
-        className="empty-full"
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
       >
-        <div className="big-icon">🕐</div>
-        <h3>Sin análisis todavía</h3>
-        <p>
-          Ve a la pestaña <strong>Análisis</strong> y analiza tu primer comentario
-          para verlo aquí.
-        </p>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            minHeight: 320,
+            gap: 2,
+          }}
+        >
+          <HistoryIcon sx={{ fontSize: 64, color: "rgba(208,188,255,0.2)" }} />
+          <Typography variant="h6" color="text.secondary">
+            Sin análisis todavía
+          </Typography>
+          <Typography
+            variant="body2"
+            color="text.disabled"
+            textAlign="center"
+            maxWidth={320}
+          >
+            Ve a la pestaña <strong>Análisis</strong> y analiza tu primer comentario
+            para verlo aquí.
+          </Typography>
+        </Box>
       </motion.div>
     );
   }
@@ -55,68 +88,171 @@ export default function HistoryTab({ history, onClear }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25 }}
     >
-      {/* Header */}
-      <div
-        className="history-header glass"
-        style={{ padding: "16px 22px", marginBottom: 20 }}
+      {/* Header bar */}
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          mb: 2.5,
+        }}
       >
-        <h2>
-          📋 Histórico de análisis{" "}
-          <span
-            style={{
-              color: "var(--muted)",
-              fontWeight: 400,
-              fontSize: "0.85rem",
+        <Box>
+          <Typography variant="h6" fontWeight={700}>
+            Histórico de análisis
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
+            {history.length} entradas
+          </Typography>
+        </Box>
+        <Box sx={{ display: "flex", gap: 1 }}>
+          <Button
+            size="small"
+            variant="outlined"
+            color="primary"
+            startIcon={<FileDownloadIcon />}
+            onClick={exportCSV}
+            sx={{
+              borderRadius: 100,
+              borderColor: "rgba(208,188,255,0.3)",
             }}
           >
-            ({history.length} entradas)
-          </span>
-        </h2>
-        <div className="history-actions">
-          <button
-            className="btn-ghost-purple"
-            onClick={exportCSV}
-          >
-            ⬇️ Exportar CSV
-          </button>
-          <button
-            className="btn-ghost-red"
+            Exportar CSV
+          </Button>
+          <Button
+            size="small"
+            variant="outlined"
+            color="error"
+            startIcon={<DeleteOutlineIcon />}
             onClick={onClear}
+            sx={{
+              borderRadius: 100,
+              borderColor: "rgba(242,184,181,0.3)",
+            }}
           >
-            🗑️ Limpiar todo
-          </button>
-        </div>
-      </div>
+            Limpiar
+          </Button>
+        </Box>
+      </Box>
 
-      {/* List */}
-      <div className="history-list">
+      {/* Cards */}
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
         <AnimatePresence>
-          {reversed.map((row, i) => (
-            <motion.div
-              key={history.length - i}
-              className={`hist-card glass ${
-                row.label === 1 ? "toxic" : "safe"
-              }`}
-              initial={{ opacity: 0, x: -16 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 16 }}
-              transition={{ duration: 0.2, delay: i * 0.03 }}
-            >
-              <span className="hist-idx">#{history.length - i}</span>
-              <span className="hist-comment">{row.comment}</span>
-              <span
-                className={`hist-badge ${
-                  row.label === 1 ? "toxic" : "safe"
-                }`}
+          {reversed.map((row, i) => {
+            const isToxic = row.label === 1;
+            return (
+              <motion.div
+                key={history.length - i}
+                initial={{ opacity: 0, x: -16 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 16 }}
+                transition={{ duration: 0.18, delay: i * 0.025 }}
               >
-                {row.resultado}
-              </span>
-              <span className="hist-type">{row.tipo}</span>
-              <span className="hist-conf">{row.confianza}</span>
-            </motion.div>
-          ))}
+                <Card
+                  elevation={0}
+                  sx={{
+                    borderLeft: `4px solid ${
+                      isToxic ? "#F2B8B5" : "#6DD58C"
+                    }`,
+                    bgcolor: isToxic
+                      ? "rgba(179,38,30,0.07)"
+                      : "rgba(20,108,46,0.07)",
+                    "&:hover": {
+                      bgcolor: isToxic
+                        ? "rgba(179,38,30,0.12)"
+                        : "rgba(20,108,46,0.12)",
+                    },
+                    transition: "background 0.2s",
+                  }}
+                >
+                  <CardContent
+                    sx={{
+                      py: 1.5,
+                      px: 2,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 2,
+                      "&:last-child": { pb: 1.5 },
+                    }}
+                  >
+                    {/* Index */}
+                    <Typography
+                      variant="caption"
+                      color="text.disabled"
+                      sx={{
+                        minWidth: 24,
+                        fontWeight: 700,
+                      }}
+                    >
+                      #{history.length - i}
+                    </Typography>
+
+                    {/* Icon */}
+                    {isToxic ? (
+                      <WarningAmberIcon
+                        sx={{ color: "error.main", flexShrink: 0 }}
+                      />
+                    ) : (
+                      <CheckCircleIcon
+                        sx={{ color: "success.main", flexShrink: 0 }}
+                      />
+                    )}
+
+                    {/* Comment */}
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        flex: 1,
+                        color: "text.primary",
+                        lineHeight: 1.4,
+                      }}
+                    >
+                      {row.comment}
+                    </Typography>
+
+                    {/* Verdict badge */}
+                    <Chip
+                      label={row.resultado}
+                      size="small"
+                      color={isToxic ? "error" : "success"}
+                      variant="outlined"
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: "0.72rem",
+                      }}
+                    />
+
+                    {/* Type */}
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{
+                        minWidth: 120,
+                        textAlign: "center",
+                      }}
+                    >
+                      {row.tipo}
+                    </Typography>
+
+                    {/* Confidence */}
+                    <Typography
+                      variant="caption"
+                      fontWeight={700}
+                      color="text.secondary"
+                      sx={{
+                        minWidth: 40,
+                        textAlign: "right",
+                      }}
+                    >
+                      {row.confianza}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            );
+          })}
         </AnimatePresence>
-      </div>
+      </Box>
     </motion.div>
   );
 }

@@ -1,36 +1,38 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { toast } from "react-hot-toast";
+import {
+  Box, Card, CardContent, Typography, TextField, Button,
+  ButtonGroup, LinearProgress, Chip, Alert, AlertTitle,
+  Collapse, Divider, Tooltip, IconButton,
+} from "@mui/material";
+import SearchIcon          from "@mui/icons-material/Search";
+import CheckCircleIcon     from "@mui/icons-material/CheckCircle";
+import WarningAmberIcon    from "@mui/icons-material/WarningAmber";
+import InfoOutlinedIcon    from "@mui/icons-material/InfoOutlined";
+import CodeIcon            from "@mui/icons-material/Code";
+import ExpandMoreIcon      from "@mui/icons-material/ExpandMore";
+import LightbulbOutlinedIcon from "@mui/icons-material/LightbulbOutlined";
 import { TYPE_CONFIG, EXAMPLES } from "../constants";
 
 const TYPE_DESCRIPTIONS = {
-  machista:            "Lenguaje sexista o discriminatorio hacia la mujer",
-  racista:             "Contenido basado en raza, etnia o nacionalidad",
-  sexual:              "Contenido sexual explícito o acoso sexual",
-  insulto:             "Insultos directos, amenazas o lenguaje agresivo",
-  "lenguaje cotidiano":"Sin categoría tóxica específica detectada",
+  machista:             "Lenguaje sexista o discriminatorio hacia la mujer",
+  racista:              "Contenido basado en raza, etnia o nacionalidad",
+  sexual:               "Contenido sexual explícito o acoso sexual",
+  insulto:              "Insultos directos, amenazas o lenguaje agresivo",
+  "lenguaje cotidiano": "Sin categoría tóxica específica detectada",
 };
 
 export default function AnalyzeTab({ onAnalyze }) {
-  const [text, setText]           = useState("");
-  const [loading, setLoading]     = useState(false);
-  const [result, setResult]       = useState(null);
-  const [showType, setShowType]   = useState(false);
-  const [showCode, setShowCode]   = useState(false);
+  const [text,     setText]     = useState("");
+  const [loading,  setLoading]  = useState(false);
+  const [result,   setResult]   = useState(null);
+  const [showType, setShowType] = useState(false);
+  const [showCode, setShowCode] = useState(false);
+  const [error,    setError]    = useState(null);
 
   async function handleSubmit() {
-    if (!text.trim()) {
-      toast.custom(() => (
-        <div style={{
-          background:"rgba(251,191,36,0.12)", border:"1px solid rgba(251,191,36,0.3)",
-          borderRadius:12, padding:"12px 16px", color:"#fbbf24", fontSize:14,
-          backdropFilter:"blur(16px)", display:"flex", gap:10, alignItems:"center",
-        }}>
-          ⚠️ <span>Escribe un comentario antes de analizar.</span>
-        </div>
-      ), { duration: 3000 });
-      return;
-    }
+    if (!text.trim()) { setError("Escribe un comentario antes de analizar."); return; }
+    setError(null);
     setLoading(true);
     try {
       const data = await onAnalyze(text);
@@ -38,15 +40,7 @@ export default function AnalyzeTab({ onAnalyze }) {
       setShowType(false);
       setShowCode(false);
     } catch {
-      toast.custom(() => (
-        <div style={{
-          background:"rgba(248,113,113,0.12)", border:"1px solid rgba(248,113,113,0.3)",
-          borderRadius:12, padding:"12px 16px", color:"#f87171", fontSize:14,
-          backdropFilter:"blur(16px)", display:"flex", gap:10, alignItems:"center",
-        }}>
-          🔌 <span>No se pudo conectar con la API.<br/><small style={{opacity:.7}}>¿Está corriendo el backend en :8000?</small></span>
-        </div>
-      ), { duration: 5000 });
+      setError("No se pudo conectar con la API. ¿Está corriendo el backend en :8000?");
     } finally {
       setLoading(false);
     }
@@ -55,206 +49,232 @@ export default function AnalyzeTab({ onAnalyze }) {
   function loadExample(type) {
     setText(EXAMPLES[type]);
     setResult(null);
-    toast(`Ejemplo ${type === "safe" ? "seguro" : "tóxico"} cargado`, {
-      icon: type === "safe" ? "💬" : "⚠️",
-      style: { background:"#1a1a2e", color:"#e2e8f0", border:"1px solid #2a2a45", borderRadius:12 },
-    });
+    setError(null);
   }
 
   const cfg = result ? (TYPE_CONFIG[result.toxicity_type] ?? TYPE_CONFIG["lenguaje cotidiano"]) : null;
 
   return (
-    <div className="analyze-grid">
-      {/* ── Input panel ── */}
-      <div className="glass panel">
-        <div className="panel-title">
-          <span>✍️</span> Introduce un comentario
-        </div>
+    <Box sx={{ display: "grid", gridTemplateColumns: { md: "1.15fr 1fr" }, gap: 3 }}>
 
-        <div className="textarea-wrap">
-          <textarea
+      {/* ── Input Card ── */}
+      <Card elevation={0}>
+        <CardContent sx={{ p: 3 }}>
+          <Typography variant="overline" color="text.secondary" sx={{ letterSpacing: 1.5 }}>
+            ✍️ Introduce un comentario
+          </Typography>
+
+          <TextField
+            multiline minRows={7} fullWidth
+            variant="outlined"
+            placeholder="Pega aquí el comentario de YouTube que quieres analizar…"
             value={text}
             onChange={e => setText(e.target.value)}
-            placeholder="Pega aquí el comentario de YouTube que quieres analizar…"
-            maxLength={1000}
+            inputProps={{ maxLength: 1000 }}
+            sx={{ mt: 1.5, mb: 0.5 }}
+            helperText={`${text.length} / 1000 caracteres`}
           />
-          <span className="char-count">{text.length}/1000</span>
-        </div>
 
-        <div className="example-row">
-          <button className="btn-example safe" onClick={() => loadExample("safe")}>
-            💬 Ejemplo seguro
-          </button>
-          <button className="btn-example toxic" onClick={() => loadExample("toxic")}>
-            ⚠️ Ejemplo tóxico
-          </button>
-        </div>
+          {/* Example buttons */}
+          <ButtonGroup fullWidth size="small" variant="outlined" sx={{ mb: 2 }}>
+            <Button color="success" startIcon={<CheckCircleIcon />}
+              onClick={() => loadExample("safe")}
+              sx={{ borderRadius: "12px 0 0 12px !important" }}>
+              Ejemplo seguro
+            </Button>
+            <Button color="error" startIcon={<WarningAmberIcon />}
+              onClick={() => loadExample("toxic")}
+              sx={{ borderRadius: "0 12px 12px 0 !important" }}>
+              Ejemplo tóxico
+            </Button>
+          </ButtonGroup>
 
-        <button
-          className="btn-analyze"
-          onClick={handleSubmit}
-          disabled={loading || !text.trim()}
-        >
-          {loading
-            ? <><span className="spinner" />Analizando…</>
-            : "🔍 Analizar comentario"}
-        </button>
+          {/* Inline error alert */}
+          <Collapse in={!!error}>
+            <Alert severity="warning" sx={{ mb: 2, borderRadius: 3 }} onClose={() => setError(null)}>
+              {error}
+            </Alert>
+          </Collapse>
 
-        {/* Tip */}
-        <p style={{fontSize:12, color:"var(--muted)", marginTop:14, lineHeight:1.5}}>
-          💡 <strong style={{color:"var(--muted2)"}}>Tip:</strong> Funciona en inglés y español.
-          El modelo detecta 5 tipos de toxicidad.
-        </p>
-      </div>
+          <Button
+            variant="contained" color="primary" fullWidth size="large"
+            startIcon={loading ? undefined : <SearchIcon />}
+            onClick={handleSubmit}
+            disabled={loading || !text.trim()}
+            sx={{ py: 1.4, fontSize: "1rem" }}>
+            {loading ? "Analizando…" : "Analizar comentario"}
+          </Button>
+          {loading && <LinearProgress sx={{ mt: 1, borderRadius: 100 }} />}
 
-      {/* ── Result panel ── */}
-      <div className="glass panel">
-        <div className="panel-title">
-          <span>📊</span> Resultado del análisis
-        </div>
+          {/* Tip */}
+          <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1, mt: 2,
+                     p: 1.5, borderRadius: 3, bgcolor: "rgba(103,80,164,0.1)",
+                     border: "1px solid rgba(208,188,255,0.12)" }}>
+            <LightbulbOutlinedIcon sx={{ fontSize: "1.1rem", color: "primary.light", mt: 0.1 }} />
+            <Typography variant="caption" color="text.secondary" lineHeight={1.5}>
+              <strong style={{ color: "#CAC4D0" }}>Tip:</strong> Funciona en inglés y español.
+              El modelo detecta 5 tipos de toxicidad distintos.
+            </Typography>
+          </Box>
+        </CardContent>
+      </Card>
 
-        <AnimatePresence mode="wait">
-          {!result && !loading && (
-            <motion.div
-              key="empty"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="result-empty"
-            >
-              <div className="empty-icon">🔍</div>
-              <p>Introduce un comentario<br/>y pulsa <strong>Analizar</strong></p>
-            </motion.div>
-          )}
+      {/* ── Result Card ── */}
+      <Card elevation={0}>
+        <CardContent sx={{ p: 3 }}>
+          <Typography variant="overline" color="text.secondary" sx={{ letterSpacing: 1.5 }}>
+            📊 Resultado del análisis
+          </Typography>
 
-          {result && (
-            <motion.div
-              key="result"
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.3 }}
-            >
-              {/* Verdict */}
-              <div className={`verdict ${result.toxic ? "toxic" : "safe"}`}>
-                <div className="verdict-top">
-                  <span className="verdict-icon">{result.toxic ? "🚨" : "✅"}</span>
-                  <h2>{result.toxic ? "TÓXICO" : "NO TÓXICO"}</h2>
-                </div>
-                <p>
-                  {result.toxic
-                    ? "Este comentario contiene lenguaje tóxico, odio o abuso detectado por el modelo."
-                    : "Este comentario parece seguro. No se detectó lenguaje ofensivo."}
-                </p>
-              </div>
+          <AnimatePresence mode="wait">
+            {!result && !loading && (
+              <motion.div key="empty"
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center",
+                           justifyContent: "center", minHeight: 260, gap: 2, color: "text.secondary" }}>
+                  <Box sx={{ width: 72, height: 72, borderRadius: "50%",
+                             bgcolor: "rgba(103,80,164,0.12)", border: "1px solid rgba(208,188,255,0.15)",
+                             display: "flex", alignItems: "center", justifyContent: "center",
+                             fontSize: "2rem" }}>
+                    🔍
+                  </Box>
+                  <Typography variant="body2" textAlign="center" color="text.secondary">
+                    Introduce un comentario<br />y pulsa <strong>Analizar</strong>
+                  </Typography>
+                </Box>
+              </motion.div>
+            )}
 
-              {/* Confidence bar */}
-              <div className="conf-wrap">
-                <div className="conf-header">
-                  <span>Confianza del modelo</span>
-                  <span className="conf-pct" style={{color: result.toxic ? "#f87171" : "#4ade80"}}>
-                    {result.confidence_pct}%
-                  </span>
-                </div>
-                <div className="conf-track">
+            {result && (
+              <motion.div key="result"
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.3 }}>
+
+                {/* Verdict alert */}
+                <Alert
+                  severity={result.toxic ? "error" : "success"}
+                  variant="outlined"
+                  icon={result.toxic ? <WarningAmberIcon /> : <CheckCircleIcon />}
+                  sx={{ mb: 2, borderRadius: 3, alignItems: "flex-start" }}>
+                  <AlertTitle sx={{ fontWeight: 800, letterSpacing: 0.5 }}>
+                    {result.toxic ? "CONTENIDO TÓXICO" : "COMENTARIO SEGURO"}
+                  </AlertTitle>
+                  <Typography variant="body2">
+                    {result.toxic
+                      ? "Este comentario contiene lenguaje tóxico, odio o abuso detectado por el modelo."
+                      : "Este comentario parece seguro. No se detectó lenguaje ofensivo."}
+                  </Typography>
+                </Alert>
+
+                {/* Confidence bar */}
+                <Box sx={{ mb: 2 }}>
+                  <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.8 }}>
+                    <Typography variant="caption" color="text.secondary">Confianza del modelo</Typography>
+                    <Typography variant="caption" fontWeight={700}
+                      sx={{ color: result.toxic ? "error.main" : "success.main" }}>
+                      {result.confidence_pct}%
+                    </Typography>
+                  </Box>
                   <motion.div
-                    className="conf-fill"
-                    initial={{ width: 0 }}
-                    animate={{ width: `${result.confidence_pct}%` }}
-                    transition={{ duration: 0.7, ease: "easeOut" }}
-                    style={{ background: result.toxic ? "#f87171" : "#4ade80" }}
-                  />
-                </div>
-              </div>
+                    initial={{ scaleX: 0 }}
+                    animate={{ scaleX: 1 }}
+                    style={{ transformOrigin: "left", borderRadius: 100 }}
+                    transition={{ duration: 0.8, ease: "easeOut" }}>
+                    <LinearProgress variant="determinate" value={result.confidence_pct}
+                      sx={{
+                        "& .MuiLinearProgress-bar": {
+                          background: result.toxic
+                            ? "linear-gradient(90deg, #B3261E, #F2B8B5)"
+                            : "linear-gradient(90deg, #146C2E, #6DD58C)",
+                        },
+                      }} />
+                  </motion.div>
+                </Box>
 
-              {/* Type card */}
-              <div
-                className="type-card"
-                style={{
-                  background: `${cfg.color}10`,
-                  borderColor: `${cfg.color}35`,
-                }}
-              >
-                <div
-                  className="type-icon-wrap"
-                  style={{ background: `${cfg.color}20` }}
-                >
-                  {cfg.icon}
-                </div>
-                <div>
-                  <div className="type-card-label" style={{color: cfg.color}}>
-                    Tipo detectado · ML Multiclase
-                  </div>
-                  <div className="type-card-name" style={{color: cfg.color}}>
-                    {cfg.label}
-                  </div>
-                </div>
-              </div>
+                {/* Type chip */}
+                <Box sx={{ mb: 2, p: 1.8, borderRadius: 3,
+                           bgcolor: `${cfg.color}14`, border: `1px solid ${cfg.color}40`,
+                           display: "flex", alignItems: "center", gap: 1.5 }}>
+                  <Box sx={{ width: 44, height: 44, borderRadius: 2.5,
+                             bgcolor: `${cfg.color}22`,
+                             display: "flex", alignItems: "center", justifyContent: "center",
+                             fontSize: "1.4rem", flexShrink: 0 }}>
+                    {cfg.icon}
+                  </Box>
+                  <Box>
+                    <Typography variant="caption" fontWeight={700} sx={{ color: cfg.color,
+                      textTransform: "uppercase", letterSpacing: 1.5 }}>
+                      Tipo detectado · ML Multiclase
+                    </Typography>
+                    <Typography variant="subtitle2" fontWeight={700} sx={{ color: cfg.color }}>
+                      {cfg.label}
+                    </Typography>
+                  </Box>
+                </Box>
 
-              {/* Expandables */}
-              <div className="expand-item">
-                <button
-                  className={`expand-trigger${showType ? " open" : ""}`}
-                  onClick={() => setShowType(v => !v)}
-                >
-                  <span>ℹ️ ¿Qué significa cada tipo?</span>
-                  <span className="chevron">▾</span>
-                </button>
-                <AnimatePresence>
-                  {showType && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                      style={{ overflow: "hidden" }}
-                    >
-                      <div className="expand-body">
-                        <div className="type-legend">
-                          {Object.entries(TYPE_CONFIG).map(([k, v]) => (
-                            <div className="legend-row" key={k}>
-                              <span className="legend-icon">{v.icon}</span>
-                              <span className="legend-name" style={{color: v.color}}>{v.label}</span>
-                              <span className="legend-desc">{TYPE_DESCRIPTIONS[k]}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
+                <Divider sx={{ borderColor: "rgba(208,188,255,0.1)", mb: 1.5 }} />
 
-              <div className="expand-item">
-                <button
-                  className={`expand-trigger${showCode ? " open" : ""}`}
-                  onClick={() => setShowCode(v => !v)}
-                >
-                  <span>🔬 Ver texto preprocesado</span>
-                  <span className="chevron">▾</span>
-                </button>
-                <AnimatePresence>
-                  {showCode && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                      style={{ overflow: "hidden" }}
-                    >
-                      <div className="expand-body">
-                        <div className="code-pre">
-                          {result.cleaned_text || "(texto vacío tras preprocesamiento)"}
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-    </div>
+                {/* Expandables */}
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                  {/* Types legend */}
+                  <Box>
+                    <Button fullWidth variant="outlined" size="small" color="secondary"
+                      startIcon={<InfoOutlinedIcon />}
+                      endIcon={<ExpandMoreIcon sx={{
+                        transform: showType ? "rotate(180deg)" : "none",
+                        transition: "transform 0.2s" }} />}
+                      onClick={() => setShowType(v => !v)}
+                      sx={{ justifyContent: "space-between", borderRadius: 2.5, px: 1.5,
+                            borderColor: "rgba(208,188,255,0.2)", color: "text.secondary" }}>
+                      ¿Qué significa cada tipo?
+                    </Button>
+                    <Collapse in={showType}>
+                      <Box sx={{ mt: 1, p: 1.5, borderRadius: 3,
+                                 bgcolor: "rgba(28,27,31,0.8)", border: "1px solid rgba(208,188,255,0.1)" }}>
+                        {Object.entries(TYPE_CONFIG).map(([k, v]) => (
+                          <Box key={k} sx={{ display: "flex", alignItems: "center", gap: 1.5, py: 0.7 }}>
+                            <Typography fontSize="1.1rem">{v.icon}</Typography>
+                            <Typography variant="body2" fontWeight={700} sx={{ color: v.color, minWidth: 100 }}>
+                              {v.label}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              {TYPE_DESCRIPTIONS[k]}
+                            </Typography>
+                          </Box>
+                        ))}
+                      </Box>
+                    </Collapse>
+                  </Box>
+
+                  {/* Raw text */}
+                  <Box>
+                    <Button fullWidth variant="outlined" size="small" color="secondary"
+                      startIcon={<CodeIcon />}
+                      endIcon={<ExpandMoreIcon sx={{
+                        transform: showCode ? "rotate(180deg)" : "none",
+                        transition: "transform 0.2s" }} />}
+                      onClick={() => setShowCode(v => !v)}
+                      sx={{ justifyContent: "space-between", borderRadius: 2.5, px: 1.5,
+                            borderColor: "rgba(208,188,255,0.2)", color: "text.secondary" }}>
+                      Ver texto preprocesado
+                    </Button>
+                    <Collapse in={showCode}>
+                      <Box sx={{ mt: 1, p: 1.5, borderRadius: 3,
+                                 bgcolor: "#0d1117", border: "1px solid rgba(208,188,255,0.1)",
+                                 fontFamily: "'Courier New', monospace", fontSize: "0.8rem",
+                                 color: "#D0BCFF", wordBreak: "break-all", lineHeight: 1.6 }}>
+                        {result.cleaned_text || "(texto vacío tras preprocesamiento)"}
+                      </Box>
+                    </Collapse>
+                  </Box>
+                </Box>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </CardContent>
+      </Card>
+    </Box>
   );
 }
