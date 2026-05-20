@@ -17,8 +17,8 @@ import {
 } from "recharts";
 import { TYPE_CONFIG } from "../constants";
 
-const TICK = { fill: "#938F99", fontSize: 12 };
-const GRID = { stroke: "rgba(255,255,255,0.05)" };
+const TICK = { fill: "#5f6368", fontSize: 12 };
+const GRID = { stroke: "rgba(0,0,0,0.06)" };
 
 const PieLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => {
   if (percent < 0.05) return null;
@@ -26,7 +26,7 @@ const PieLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => {
   const r   = innerRadius + (outerRadius - innerRadius) * 0.55;
   return (
     <text x={cx + r * Math.cos(-midAngle * rad)} y={cy + r * Math.sin(-midAngle * rad)}
-      fill="#E6E1E5" textAnchor="middle" dominantBaseline="central"
+      fill="#fff" textAnchor="middle" dominantBaseline="central"
       fontSize={13} fontWeight={700}>
       {`${(percent * 100).toFixed(0)}%`}
     </text>
@@ -34,10 +34,11 @@ const PieLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => {
 };
 
 const TIP = {
-  contentStyle: { background: "#1C1B1F", border: "1px solid rgba(208,188,255,0.15)", borderRadius: 12 },
-  itemStyle: { color: "#CAC4D0" },
-  labelStyle: { color: "#E6E1E5" },
-  cursor: { fill: "rgba(255,255,255,0.03)" },
+  contentStyle: { background: "#fff", border: "1px solid #e8eaed", borderRadius: 12,
+                  boxShadow: "0 4px 12px rgba(60,64,67,0.1)" },
+  itemStyle: { color: "#202124" },
+  labelStyle: { color: "#5f6368" },
+  cursor: { fill: "rgba(26,115,232,0.04)" },
 };
 
 export default function StatsTab({ history }) {
@@ -46,7 +47,7 @@ export default function StatsTab({ history }) {
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
         <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center",
                    justifyContent: "center", minHeight: 320, gap: 2 }}>
-          <BarChartIcon sx={{ fontSize: 64, color: "rgba(208,188,255,0.2)" }} />
+          <BarChartIcon sx={{ fontSize: 64, color: "#dadce0" }} />
           <Typography variant="h6" color="text.secondary">Sin datos todavía</Typography>
           <Typography variant="body2" color="text.disabled" textAlign="center" maxWidth={300}>
             Analiza al menos un comentario para generar estadísticas en tiempo real.
@@ -63,16 +64,16 @@ export default function StatsTab({ history }) {
   const avgConf  = Math.round(history.reduce((s, r) => s + parseInt(r.confianza), 0) / total);
 
   const kpis = [
-    { val: total,          lbl: "Analizados",        icon: <SearchIcon />,        color: "#D0BCFF" },
-    { val: nToxic,         lbl: "Tóxicos",            icon: <WarningAmberIcon />,  color: "#F2B8B5" },
-    { val: nSafe,          lbl: "No tóxicos",         icon: <CheckCircleIcon />,   color: "#6DD58C" },
-    { val: `${pctToxic}%`, lbl: "Tasa de toxicidad",  icon: <ShowChartIcon />,     color: "#FFB74D" },
-    { val: `${avgConf}%`,  lbl: "Confianza media",    icon: <BarChartIcon />,      color: "#4FC3F7" },
+    { val: total,          lbl: "Analizados",       icon: <SearchIcon />,       color: "#1a73e8", bg: "#e8f0fe" },
+    { val: nToxic,         lbl: "Tóxicos",           icon: <WarningAmberIcon />, color: "#c5221f", bg: "#fce8e6" },
+    { val: nSafe,          lbl: "No tóxicos",        icon: <CheckCircleIcon />,  color: "#137333", bg: "#e6f4ea" },
+    { val: `${pctToxic}%`, lbl: "Tasa de toxicidad", icon: <ShowChartIcon />,    color: "#e37400", bg: "#fef7e0" },
+    { val: `${avgConf}%`,  lbl: "Confianza media",   icon: <BarChartIcon />,     color: "#1a73e8", bg: "#e8f0fe" },
   ];
 
   const pieData = [
-    { name: "Tóxico",    value: nToxic, color: "#B3261E" },
-    { name: "No tóxico", value: nSafe,  color: "#146C2E" },
+    { name: "Tóxico",    value: nToxic, color: "#ea4335" },
+    { name: "No tóxico", value: nSafe,  color: "#34a853" },
   ];
 
   const typeCounts = {};
@@ -80,7 +81,7 @@ export default function StatsTab({ history }) {
   const barData = Object.entries(typeCounts).map(([type, count]) => ({
     name: `${TYPE_CONFIG[type]?.icon} ${TYPE_CONFIG[type]?.label ?? type}`,
     count,
-    color: TYPE_CONFIG[type]?.color ?? "#888",
+    color: TYPE_CONFIG[type]?.color ?? "#9aa0a6",
   }));
 
   const lineData = history.map((r, i) => ({
@@ -111,8 +112,8 @@ export default function StatsTab({ history }) {
             transition={{ delay: i * 0.07, duration: 0.28 }}>
             <Card elevation={0} sx={{
               textAlign: "center", py: 2.5, px: 1,
-              border: `1px solid ${k.color}25`,
-              background: `${k.color}0d`,
+              border: `1px solid ${k.color}30`,
+              background: k.bg,
               position: "relative", overflow: "hidden",
             }}>
               <Box sx={{ color: k.color, mb: 0.5 }}>{k.icon}</Box>
@@ -140,7 +141,7 @@ export default function StatsTab({ history }) {
                   cx="50%" cy="50%" outerRadius={88}
                   labelLine={false} label={<PieLabel />}>
                   {pieData.map((e, i) => (
-                    <Cell key={i} fill={e.color} stroke="rgba(0,0,0,0.4)" strokeWidth={2} />
+                    <Cell key={i} fill={e.color} stroke="#fff" strokeWidth={2} />
                   ))}
                 </Pie>
                 <Tooltip {...TIP} />
@@ -170,7 +171,7 @@ export default function StatsTab({ history }) {
                 <YAxis tick={TICK} allowDecimals={false} />
                 <Tooltip {...TIP} />
                 <Bar dataKey="count" radius={[6, 6, 0, 0]}
-                  label={{ position: "top", fill: "#938F99", fontSize: 12 }}>
+                  label={{ position: "top", fill: "#5f6368", fontSize: 12 }}>
                   {barData.map((e, i) => <Cell key={i} fill={e.color} />)}
                 </Bar>
               </BarChart>
@@ -187,20 +188,20 @@ export default function StatsTab({ history }) {
             <LineChart data={lineData} margin={{ top: 10, right: 24, bottom: 10, left: 0 }}>
               <CartesianGrid {...GRID} />
               <XAxis dataKey="n" tick={TICK}
-                label={{ value: "Nº análisis", position: "insideBottom", fill: "#938F99", dy: 12 }} />
+                label={{ value: "Nº análisis", position: "insideBottom", fill: "#5f6368", dy: 12 }} />
               <YAxis tick={TICK} domain={[0, 100]} unit="%" />
               <Tooltip {...TIP} formatter={v => [`${v}%`, "Confianza"]} />
-              <ReferenceLine y={50} stroke="#3b3b6b" strokeDasharray="4 4" />
-              <Line type="monotone" dataKey="conf" stroke="#D0BCFF" strokeWidth={2.5}
+              <ReferenceLine y={50} stroke="#dadce0" strokeDasharray="4 4" />
+              <Line type="monotone" dataKey="conf" stroke="#1a73e8" strokeWidth={2.5}
                 dot={props => {
-                  const c = props.payload.toxic === 1 ? "#F2B8B5" : "#6DD58C";
+                  const c = props.payload.toxic === 1 ? "#ea4335" : "#34a853";
                   return <circle key={props.key} cx={props.cx} cy={props.cy}
-                    r={5} fill={c} stroke="#1C1B1F" strokeWidth={2} />;
+                    r={5} fill={c} stroke="#fff" strokeWidth={2} />;
                 }} />
             </LineChart>
           </ResponsiveContainer>
           <Box sx={{ display: "flex", gap: 2, mt: 1 }}>
-            {[["#F2B8B5","Tóxico"],["#6DD58C","No tóxico"],["#D0BCFF","Línea confianza"]].map(([c,l]) => (
+            {[["#ea4335","Tóxico"],["#34a853","No tóxico"],["#1a73e8","Línea confianza"]].map(([c,l]) => (
               <Box key={l} sx={{ display: "flex", alignItems: "center", gap: 0.8 }}>
                 <Box sx={{ width: 10, height: 10, borderRadius: "50%", bgcolor: c }} />
                 <Typography variant="caption" color="text.secondary">{l}</Typography>
@@ -213,8 +214,7 @@ export default function StatsTab({ history }) {
       {/* Export */}
       <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
         <Button variant="outlined" color="primary" startIcon={<FileDownloadIcon />}
-          onClick={exportCSV}
-          sx={{ borderRadius: 100, borderColor: "rgba(208,188,255,0.3)" }}>
+          onClick={exportCSV}>
           Exportar estadísticas CSV
         </Button>
       </Box>

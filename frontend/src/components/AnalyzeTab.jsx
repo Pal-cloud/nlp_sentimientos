@@ -109,12 +109,15 @@ export default function AnalyzeTab({ onAnalyze }) {
           {loading && <LinearProgress sx={{ mt: 1, borderRadius: 100 }} />}
 
           {/* Tip */}
-          <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1, mt: 2,
-                     p: 1.5, borderRadius: 3, bgcolor: "rgba(103,80,164,0.1)",
-                     border: "1px solid rgba(208,188,255,0.12)" }}>
-            <LightbulbOutlinedIcon sx={{ fontSize: "1.1rem", color: "primary.light", mt: 0.1 }} />
+          <Box sx={{
+            display: "flex", alignItems: "flex-start", gap: 1, mt: 2,
+            p: 1.5, borderRadius: 3,
+            bgcolor: "#e8f0fe",
+            border: "1px solid #c5d9f8",
+          }}>
+            <LightbulbOutlinedIcon sx={{ fontSize: "1.1rem", color: "primary.main", mt: 0.1 }} />
             <Typography variant="caption" color="text.secondary" lineHeight={1.5}>
-              <strong style={{ color: "#CAC4D0" }}>Tip:</strong> Funciona en inglés y español.
+              <strong style={{ color: "#1a73e8" }}>Tip:</strong> Funciona en inglés y español.
               El modelo detecta 5 tipos de toxicidad distintos.
             </Typography>
           </Box>
@@ -132,12 +135,16 @@ export default function AnalyzeTab({ onAnalyze }) {
             {!result && !loading && (
               <motion.div key="empty"
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center",
-                           justifyContent: "center", minHeight: 260, gap: 2, color: "text.secondary" }}>
-                  <Box sx={{ width: 72, height: 72, borderRadius: "50%",
-                             bgcolor: "rgba(103,80,164,0.12)", border: "1px solid rgba(208,188,255,0.15)",
-                             display: "flex", alignItems: "center", justifyContent: "center",
-                             fontSize: "2rem" }}>
+                <Box sx={{
+                  display: "flex", flexDirection: "column", alignItems: "center",
+                  justifyContent: "center", minHeight: 260, gap: 2, color: "text.secondary",
+                }}>
+                  <Box sx={{
+                    width: 72, height: 72, borderRadius: "50%",
+                    bgcolor: "#e8f0fe", border: "1px solid #c5d9f8",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: "2rem",
+                  }}>
                     🔍
                   </Box>
                   <Typography variant="body2" textAlign="center" color="text.secondary">
@@ -188,26 +195,31 @@ export default function AnalyzeTab({ onAnalyze }) {
                       sx={{
                         "& .MuiLinearProgress-bar": {
                           background: result.toxic
-                            ? "linear-gradient(90deg, #B3261E, #F2B8B5)"
-                            : "linear-gradient(90deg, #146C2E, #6DD58C)",
+                            ? "linear-gradient(90deg, #c5221f, #ea4335)"
+                            : "linear-gradient(90deg, #137333, #34a853)",
                         },
                       }} />
                   </motion.div>
                 </Box>
 
                 {/* Type chip */}
-                <Box sx={{ mb: 2, p: 1.8, borderRadius: 3,
-                           bgcolor: `${cfg.color}14`, border: `1px solid ${cfg.color}40`,
-                           display: "flex", alignItems: "center", gap: 1.5 }}>
-                  <Box sx={{ width: 44, height: 44, borderRadius: 2.5,
-                             bgcolor: `${cfg.color}22`,
-                             display: "flex", alignItems: "center", justifyContent: "center",
-                             fontSize: "1.4rem", flexShrink: 0 }}>
+                <Box sx={{
+                  mb: 2, p: 1.8, borderRadius: 3,
+                  bgcolor: `${cfg.color}12`, border: `1px solid ${cfg.color}30`,
+                  display: "flex", alignItems: "center", gap: 1.5,
+                }}>
+                  <Box sx={{
+                    width: 44, height: 44, borderRadius: 2.5,
+                    bgcolor: `${cfg.color}20`,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: "1.4rem", flexShrink: 0,
+                  }}>
                     {cfg.icon}
                   </Box>
                   <Box>
-                    <Typography variant="caption" fontWeight={700} sx={{ color: cfg.color,
-                      textTransform: "uppercase", letterSpacing: 1.5 }}>
+                    <Typography variant="caption" fontWeight={700} sx={{
+                      color: cfg.color, textTransform: "uppercase", letterSpacing: 1.5,
+                    }}>
                       Tipo detectado · ML Multiclase
                     </Typography>
                     <Typography variant="subtitle2" fontWeight={700} sx={{ color: cfg.color }}>
@@ -216,29 +228,32 @@ export default function AnalyzeTab({ onAnalyze }) {
                   </Box>
                 </Box>
 
-                <Divider sx={{ borderColor: "rgba(208,188,255,0.1)", mb: 1.5 }} />
+                <Divider sx={{ mb: 1.5 }} />
 
                 {/* Expandables */}
                 <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
                   {/* Types legend */}
                   <Box>
-                    <Button fullWidth variant="outlined" size="small" color="secondary"
+                    <Button fullWidth variant="outlined" size="small" color="primary"
                       startIcon={<InfoOutlinedIcon />}
                       endIcon={<ExpandMoreIcon sx={{
                         transform: showType ? "rotate(180deg)" : "none",
-                        transition: "transform 0.2s" }} />}
+                        transition: "transform 0.2s",
+                      }} />}
                       onClick={() => setShowType(v => !v)}
-                      sx={{ justifyContent: "space-between", borderRadius: 2.5, px: 1.5,
-                            borderColor: "rgba(208,188,255,0.2)", color: "text.secondary" }}>
+                      sx={{ justifyContent: "space-between", borderRadius: 2.5, px: 1.5 }}>
                       ¿Qué significa cada tipo?
                     </Button>
                     <Collapse in={showType}>
-                      <Box sx={{ mt: 1, p: 1.5, borderRadius: 3,
-                                 bgcolor: "rgba(28,27,31,0.8)", border: "1px solid rgba(208,188,255,0.1)" }}>
+                      <Box sx={{
+                        mt: 1, p: 1.5, borderRadius: 3,
+                        bgcolor: "#f8f9fa", border: "1px solid #e8eaed",
+                      }}>
                         {Object.entries(TYPE_CONFIG).map(([k, v]) => (
                           <Box key={k} sx={{ display: "flex", alignItems: "center", gap: 1.5, py: 0.7 }}>
                             <Typography fontSize="1.1rem">{v.icon}</Typography>
-                            <Typography variant="body2" fontWeight={700} sx={{ color: v.color, minWidth: 100 }}>
+                            <Typography variant="body2" fontWeight={700}
+                              sx={{ color: v.color, minWidth: 100 }}>
                               {v.label}
                             </Typography>
                             <Typography variant="caption" color="text.secondary">
@@ -252,21 +267,23 @@ export default function AnalyzeTab({ onAnalyze }) {
 
                   {/* Raw text */}
                   <Box>
-                    <Button fullWidth variant="outlined" size="small" color="secondary"
+                    <Button fullWidth variant="outlined" size="small" color="primary"
                       startIcon={<CodeIcon />}
                       endIcon={<ExpandMoreIcon sx={{
                         transform: showCode ? "rotate(180deg)" : "none",
-                        transition: "transform 0.2s" }} />}
+                        transition: "transform 0.2s",
+                      }} />}
                       onClick={() => setShowCode(v => !v)}
-                      sx={{ justifyContent: "space-between", borderRadius: 2.5, px: 1.5,
-                            borderColor: "rgba(208,188,255,0.2)", color: "text.secondary" }}>
+                      sx={{ justifyContent: "space-between", borderRadius: 2.5, px: 1.5 }}>
                       Ver texto preprocesado
                     </Button>
                     <Collapse in={showCode}>
-                      <Box sx={{ mt: 1, p: 1.5, borderRadius: 3,
-                                 bgcolor: "#0d1117", border: "1px solid rgba(208,188,255,0.1)",
-                                 fontFamily: "'Courier New', monospace", fontSize: "0.8rem",
-                                 color: "#D0BCFF", wordBreak: "break-all", lineHeight: 1.6 }}>
+                      <Box sx={{
+                        mt: 1, p: 1.5, borderRadius: 3,
+                        bgcolor: "#f1f3f4", border: "1px solid #e8eaed",
+                        fontFamily: "'Courier New', monospace", fontSize: "0.8rem",
+                        color: "#202124", wordBreak: "break-all", lineHeight: 1.6,
+                      }}>
                         {result.cleaned_text || "(texto vacío tras preprocesamiento)"}
                       </Box>
                     </Collapse>

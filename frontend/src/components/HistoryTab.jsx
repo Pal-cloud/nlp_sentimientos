@@ -37,7 +37,7 @@ export default function HistoryTab({ history, onClear }) {
             gap: 2,
           }}
         >
-          <HistoryIcon sx={{ fontSize: 64, color: "rgba(208,188,255,0.2)" }} />
+          <HistoryIcon sx={{ fontSize: 64, color: "#dadce0" }} />
           <Typography variant="h6" color="text.secondary">
             Sin análisis todavía
           </Typography>
@@ -74,10 +74,11 @@ export default function HistoryTab({ history, onClear }) {
     toast("CSV exportado correctamente", {
       icon: "⬇️",
       style: {
-        background: "#1a1a2e",
-        color: "#e2e8f0",
-        border: "1px solid #2a2a45",
+        background: "#fff",
+        color: "#202124",
+        border: "1px solid #e8eaed",
         borderRadius: 12,
+        boxShadow: "0 4px 12px rgba(60,64,67,0.1)",
       },
     });
   }
@@ -114,10 +115,7 @@ export default function HistoryTab({ history, onClear }) {
             color="primary"
             startIcon={<FileDownloadIcon />}
             onClick={exportCSV}
-            sx={{
-              borderRadius: 100,
-              borderColor: "rgba(208,188,255,0.3)",
-            }}
+            sx={{ borderRadius: 100 }}
           >
             Exportar CSV
           </Button>
@@ -127,10 +125,7 @@ export default function HistoryTab({ history, onClear }) {
             color="error"
             startIcon={<DeleteOutlineIcon />}
             onClick={onClear}
-            sx={{
-              borderRadius: 100,
-              borderColor: "rgba(242,184,181,0.3)",
-            }}
+            sx={{ borderRadius: 100 }}
           >
             Limpiar
           </Button>
@@ -153,16 +148,10 @@ export default function HistoryTab({ history, onClear }) {
                 <Card
                   elevation={0}
                   sx={{
-                    borderLeft: `4px solid ${
-                      isToxic ? "#F2B8B5" : "#6DD58C"
-                    }`,
-                    bgcolor: isToxic
-                      ? "rgba(179,38,30,0.07)"
-                      : "rgba(20,108,46,0.07)",
+                    borderLeft: `4px solid ${isToxic ? "#ea4335" : "#34a853"}`,
+                    bgcolor: isToxic ? "#fce8e6" : "#e6f4ea",
                     "&:hover": {
-                      bgcolor: isToxic
-                        ? "rgba(179,38,30,0.12)"
-                        : "rgba(20,108,46,0.12)",
+                      bgcolor: isToxic ? "#fad2cf" : "#ceead6",
                     },
                     transition: "background 0.2s",
                   }}
