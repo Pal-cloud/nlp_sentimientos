@@ -3,7 +3,9 @@ utils.py - Funciones de preprocesamiento para la app Streamlit.
 Deben ser idénticas a las usadas durante el entrenamiento del modelo.
 """
 
+import os
 import re
+import joblib
 import nltk
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
@@ -17,6 +19,17 @@ for resource in ["stopwords", "wordnet", "omw-1.4"]:
 
 STOP_WORDS = set(stopwords.words("english")) | set(stopwords.words("spanish"))
 lemmatizer = WordNetLemmatizer()
+
+# ── ML-based type classifier ───────────────────────────────────────────────────
+_BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+_TYPE_MODEL_PATH = os.path.join(_BASE_DIR, "models", "type_classifier.pkl")
+_type_pipeline = None
+
+def _load_type_pipeline():
+    global _type_pipeline
+    if _type_pipeline is None and os.path.exists(_TYPE_MODEL_PATH):
+        _type_pipeline = joblib.load(_TYPE_MODEL_PATH)
+    return _type_pipeline
 
 
 def clean_text(text: str) -> str:
@@ -51,38 +64,30 @@ def clean_text(text: str) -> str:
     return " ".join(tokens)
 
 
-# ── Clasificador de tipo de toxicidad ─────────────────────────────────────────
+# ── Clasificador de tipo de toxicidad (ML) ────────────────────────────────────
 _KEYWORDS = {
     "machista": [
-        # ES
         "mujer", "mujeres", "hembra", "feminista", "cocina", "femenino", "fregona",
         "puta", "zorra", "perra", "sumisa", "callar", "inferior", "menor",
-        # EN
         "women", "female", "feminist", "kitchen", "bitch", "slut", "whore",
         "sexist", "inferior", "obey", "shut up woman",
     ],
     "racista": [
-        # ES
         "raza", "racista", "negro", "moro", "sudaca", "inmigrante", "extranjero",
         "deportar", "deported", "plaga", "inferior", "etnia", "gitano",
-        # EN
         "racist", "race", "monkey", "deportar", "deport", "immigrant", "ethnic",
         "nationality", "nationalist", "skin", "white", "black people",
     ],
     "sexual": [
-        # ES
         "sexo", "sexual", "porno", "desnudo", "genitales", "masturbacion",
         "violacion", "abusar", "acoso", "toquetear",
-        # EN
         "sex", "sexual", "porn", "naked", "rape", "molest", "harass",
         "genitals", "nude", "explicit",
     ],
     "insulto": [
-        # ES
         "idiota", "imbecil", "estupido", "inutil", "basura", "mierda",
         "asco", "muerto", "suicida", "desgraciado", "cerdo", "animal",
         "miserable", "gusano", "escoria",
-        # EN
         "idiot", "moron", "stupid", "dumb", "garbage", "trash", "loser",
         "freak", "pathetic", "worthless", "die", "kill", "hate", "disgusting",
         "shut up", "fool", "scum",
@@ -92,19 +97,23 @@ _KEYWORDS = {
 
 def classify_toxicity_type(text: str) -> str:
     """
-    Clasifica el tipo de toxicidad de un texto.
-    Devuelve: 'machista', 'racista', 'sexual', 'insulto' o 'lenguaje cotidiano'.
-    Si hay empate o el texto no es tóxico, devuelve 'lenguaje cotidiano'.
+    Classifies the toxicity type using an ML pipeline when available,
+    falling back to keyword matching.
+    Returns: 'machista', 'racista', 'sexual', 'insulto' or 'lenguaje cotidiano'.
     """
+    pipeline = _load_type_pipeline()
+    if pipeline is not None:
+        pred = pipeline.predict([text])[0]
+        if pred == "normal":
+            return "lenguaje cotidiano"
+        return pred
+
+    # ── Keyword fallback ───────────────────────────────────────────────────────
     text_lower = text.lower()
     scores = {cat: 0 for cat in _KEYWORDS}
-
     for cat, keywords in _KEYWORDS.items():
         for kw in keywords:
             if kw in text_lower:
                 scores[cat] += 1
-
     best_cat = max(scores, key=scores.get)
-    if scores[best_cat] == 0:
-        return "lenguaje cotidiano"
-    return best_cat
+    return best_cat if scores[best_cat] > 0 else "lenguaje cotidiano"
