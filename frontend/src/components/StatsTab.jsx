@@ -2,12 +2,14 @@ import { motion } from "framer-motion";
 import {
   Box, Card, CardContent, Typography, Button, Divider,
 } from "@mui/material";
-import FileDownloadIcon from "@mui/icons-material/FileDownload";
-import SearchIcon       from "@mui/icons-material/Search";
-import WarningAmberIcon from "@mui/icons-material/WarningAmber";
-import CheckCircleIcon  from "@mui/icons-material/CheckCircle";
-import ShowChartIcon    from "@mui/icons-material/ShowChart";
-import BarChartIcon     from "@mui/icons-material/BarChart";
+import {
+  FileDownload as FileDownloadIcon,
+  Search as SearchIcon,
+  WarningAmber as WarningAmberIcon,
+  CheckCircle as CheckCircleIcon,
+  ShowChart as ShowChartIcon,
+  BarChart as BarChartIcon,
+} from "@mui/icons-material";
 import {
   PieChart, Pie, Cell, Tooltip, ResponsiveContainer,
   BarChart, Bar, XAxis, YAxis, CartesianGrid,

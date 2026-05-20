@@ -1,55 +1,60 @@
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Box, Drawer, AppBar, Toolbar, Tabs, Tab, Typography,
-  Chip, List, ListItem, ListItemIcon, ListItemText,
-  Divider, Avatar, Snackbar, Alert,
-} from "@mui/material";
-import ShieldIcon        from "@mui/icons-material/Shield";
-import SearchIcon        from "@mui/icons-material/Search";
-import HistoryIcon       from "@mui/icons-material/History";
-import BarChartIcon      from "@mui/icons-material/BarChart";
-import HelpOutlineIcon   from "@mui/icons-material/HelpOutline";
-import LooksOneIcon      from "@mui/icons-material/LooksOne";
-import LooksTwoIcon      from "@mui/icons-material/LooksTwo";
-import Looks3Icon        from "@mui/icons-material/Looks3";
-import Looks4Icon        from "@mui/icons-material/Looks4";
-import SmartToyIcon      from "@mui/icons-material/SmartToy";
-import { analyzeComment }    from "./api";
-import { TYPE_CONFIG, EXAMPLES } from "./constants";
-import AnalyzeTab  from "./components/AnalyzeTab";
-import HistoryTab  from "./components/HistoryTab";
-import StatsTab    from "./components/StatsTab";
+  Box, AppBar, Toolbar, Tabs, Tab, Typography,
+  Chip, Container, Snackbar, Alert, Stack,
+} from '@mui/material';
+import {
+  Shield as ShieldIcon,
+  Search as SearchIcon,
+  History as HistoryIcon,
+  BarChart as BarChartIcon,
+  SmartToy as SmartToyIcon,
+} from '@mui/icons-material';
+import { analyzeComment }       from './api';
+import { TYPE_CONFIG }          from './constants';
+import AnalyzeTab  from './components/AnalyzeTab';
+import HistoryTab  from './components/HistoryTab';
+import StatsTab    from './components/StatsTab';
 
-const DRAWER_W = 260;
+const G_BLUE   = '#1a73e8';
+const G_RED    = '#ea4335';
+const G_YELLOW = '#fbbc04';
+const G_GREEN  = '#34a853';
+const G_DOTS   = [G_BLUE, G_RED, G_YELLOW, G_GREEN];
 
-const HOW_STEPS = [
-  { icon: <LooksOneIcon fontSize="small" />, text: "Escribe o pega un comentario de YouTube." },
-  { icon: <LooksTwoIcon fontSize="small" />, text: "TF-IDF vectoriza el texto al instante." },
-  { icon: <Looks3Icon   fontSize="small" />, text: "Logistic Regression lo clasifica." },
-  { icon: <Looks4Icon   fontSize="small" />, text: "El modelo ML detecta el tipo exacto." },
+const HERO_CHIPS = [
+  { emoji: '⚡', label: 'Análisis instantáneo', color: G_BLUE   },
+  { emoji: '�', label: 'Bilingüe ES / EN',      color: G_GREEN  },
+  { emoji: '�', label: 'ML Multiclase',         color: G_RED    },
+  { emoji: '�', label: '5 tipos detectados',    color: G_YELLOW },
 ];
+
+function GDots() {
+  return (
+    <Stack direction='row' spacing={0.6} sx={{ mb: 2 }}>
+      {G_DOTS.map((c, i) => (
+        <Box key={i} sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: c }} />
+      ))}
+    </Stack>
+  );
+}
 
 export default function App() {
   const [tab,     setTab]     = useState(0);
   const [history, setHistory] = useState([]);
-  const [snack,   setSnack]   = useState(null); // { msg, severity }
+  const [snack,   setSnack]   = useState(null);
 
   async function handleAnalyze(text) {
     const data = await analyzeComment(text);
-    const cfg  = TYPE_CONFIG[data.toxicity_type] ?? TYPE_CONFIG["lenguaje cotidiano"];
-
-    if (data.toxic) {
-      setSnack({ severity: "error",
-        msg: `🚨 Tóxico detectado — ${cfg.icon} ${cfg.label} · ${data.confidence_pct}% confianza` });
-    } else {
-      setSnack({ severity: "success",
-        msg: `✅ Comentario seguro — confianza ${data.confidence_pct}%` });
-    }
-
+    const cfg  = TYPE_CONFIG[data.toxicity_type] ?? TYPE_CONFIG['lenguaje cotidiano'];
+    setSnack(data.toxic
+      ? { severity: 'error',   msg: `Tóxico — ${cfg.label} · ${data.confidence_pct}% confianza` }
+      : { severity: 'success', msg: `Comentario seguro · confianza ${data.confidence_pct}%` }
+    );
     setHistory(prev => [...prev, {
-      comment:   text.slice(0, 120) + (text.length > 120 ? "…" : ""),
-      resultado: data.toxic ? "Tóxico" : "No tóxico",
+      comment:   text.slice(0, 120) + (text.length > 120 ? '…' : ''),
+      resultado: data.toxic ? 'Tóxico' : 'No tóxico',
       tipo:      `${cfg.icon} ${cfg.label}`,
       confianza: `${data.confidence_pct}%`,
       label:     data.label,
@@ -59,139 +64,124 @@ export default function App() {
     return data;
   }
 
+  const nToxic = history.filter(h => h.label === 1).length;
+  const nSafe  = history.filter(h => h.label === 0).length;
+
   return (
-    <Box sx={{ display: "flex", minHeight: "100vh" }}>
+    <Box sx={{ minHeight: "100vh", bgcolor: "#f8f9fa", display: "flex", flexDirection: "column" }}>
 
-      {/* ── Permanent Drawer ── */}
-      <Drawer variant="permanent" anchor="left"
-        sx={{ width: DRAWER_W, flexShrink: 0,
-              "& .MuiDrawer-paper": { width: DRAWER_W, overflowX: "hidden" } }}>
-
-        {/* Logo */}
-        <Box sx={{ px: 2.5, py: 3, display: "flex", alignItems: "center", gap: 1.5 }}>
-          <Avatar sx={{ bgcolor: "primary.main", width: 44, height: 44,
-                        boxShadow: "0 0 20px rgba(103,80,164,0.5)" }}>
-            <ShieldIcon />
-          </Avatar>
-          <Box>
-            <Typography variant="subtitle1" fontWeight={700} color="text.primary" lineHeight={1.2}>
-              Hate Speech
-            </Typography>
-            <Typography variant="caption" color="text.secondary">Detector · NLP</Typography>
-          </Box>
-        </Box>
-
-        <Divider sx={{ borderColor: "rgba(208,188,255,0.1)" }} />
-
-        {/* How it works */}
-        <Box sx={{ px: 2, pt: 2 }}>
-          <Typography variant="overline" sx={{ color: "text.secondary", px: 0.5 }}>
-            ¿Cómo funciona?
-          </Typography>
-          <List dense disablePadding>
-            {HOW_STEPS.map((s, i) => (
-              <ListItem key={i} sx={{ px: 0.5, py: 0.6 }}>
-                <ListItemIcon sx={{ minWidth: 32, color: "primary.light" }}>{s.icon}</ListItemIcon>
-                <ListItemText primary={s.text} />
-              </ListItem>
-            ))}
-          </List>
-        </Box>
-
-        <Divider sx={{ borderColor: "rgba(208,188,255,0.1)", my: 1.5 }} />
-
-        {/* Tech stack */}
-        <Box sx={{ px: 2 }}>
-          <Typography variant="overline" sx={{ color: "text.secondary", px: 0.5 }}>
-            Tecnología
-          </Typography>
-          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.8, mt: 1, px: 0.5 }}>
-            {["TF-IDF","Logistic Reg.","ML Multiclase","FastAPI","React + Vite","Bilingüe ES/EN"]
-              .map(t => (
-                <Chip key={t} label={t} size="small"
-                  sx={{ bgcolor: "rgba(103,80,164,0.18)", color: "primary.light",
-                        border: "1px solid rgba(208,188,255,0.15)", fontSize: "0.7rem" }} />
-              ))}
-          </Box>
-        </Box>
-
-        <Divider sx={{ borderColor: "rgba(208,188,255,0.1)", my: 1.5 }} />
-
-        {/* Type legend */}
-        <Box sx={{ px: 2 }}>
-          <Typography variant="overline" sx={{ color: "text.secondary", px: 0.5 }}>
-            Tipos detectados
-          </Typography>
-          <List dense disablePadding sx={{ mt: 0.5 }}>
-            {Object.entries(TYPE_CONFIG).map(([k, v]) => (
-              <ListItem key={k} sx={{ px: 0.5, py: 0.4 }}>
-                <ListItemIcon sx={{ minWidth: 28, fontSize: "1rem" }}>{v.icon}</ListItemIcon>
-                <ListItemText primary={v.label}
-                  primaryTypographyProps={{ fontSize: "0.8rem", color: v.color, fontWeight: 600 }} />
-              </ListItem>
-            ))}
-          </List>
-        </Box>
-
-        {/* Footer */}
-        <Box sx={{ mt: "auto", px: 2.5, py: 2, borderTop: "1px solid rgba(208,188,255,0.08)" }}>
-          <Typography variant="caption" color="text.secondary" display="block">
-            Proyecto académico · NLP · 2025
-          </Typography>
-          <Typography variant="caption" color="primary.light">React + FastAPI</Typography>
-        </Box>
-      </Drawer>
-
-      {/* ── Main ── */}
-      <Box component="main" sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
-
-        {/* AppBar */}
-        <AppBar position="static" elevation={0}
-          sx={{ bgcolor: "rgba(28,27,31,0.9)", backdropFilter: "blur(20px)",
-                borderBottom: "1px solid rgba(208,188,255,0.1)" }}>
-          <Toolbar sx={{ gap: 2 }}>
-            <SmartToyIcon sx={{ color: "primary.light" }} />
-            <Box sx={{ flexGrow: 1 }}>
-              <Typography variant="h6" color="text.primary" lineHeight={1}>
-                Detector de Mensajes de Odio en YouTube
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                Análisis en tiempo real · ML Multiclase
-              </Typography>
+      {/* ── AppBar ── */}
+      <AppBar position="sticky" elevation={0}>
+        <Toolbar sx={{ gap: 1.5, px: { xs: 2, md: 4 } }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.2, mr: 1 }}>
+            <Box sx={{
+              width: 36, height: 36, borderRadius: "50%",
+              background: `linear-gradient(135deg, ${G_BLUE}, ${G_GREEN})`,
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
+              <ShieldIcon sx={{ fontSize: 20, color: "#fff" }} />
             </Box>
-            <Chip label={`${history.length} analizados`} size="small"
-              icon={<BarChartIcon sx={{ fontSize: "1rem !important" }} />}
-              sx={{ bgcolor: "rgba(103,80,164,0.2)", color: "primary.light",
-                    border: "1px solid rgba(208,188,255,0.2)" }} />
-          </Toolbar>
+            <Typography fontWeight={700} fontSize="1.05rem" color="text.primary" letterSpacing={-0.2}>
+              Hate<span style={{ color: G_BLUE }}>Guard</span>
+            </Typography>
+          </Box>
 
-          <Tabs value={tab} onChange={(_, v) => setTab(v)}
-            sx={{ px: 2, minHeight: 44 }}
-            TabIndicatorProps={{ style: { height: 3, borderRadius: 3 } }}>
+          <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ flex: 1 }}>
             <Tab icon={<SearchIcon fontSize="small" />} iconPosition="start" label="Análisis" />
-            <Tab icon={<HistoryIcon fontSize="small" />} iconPosition="start"
+            <Tab
+              icon={<HistoryIcon fontSize="small" />}
+              iconPosition="start"
               label={
-                <Box sx={{ display: "flex", alignItems: "center", gap: 0.8 }}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 0.7 }}>
                   Histórico
                   {history.length > 0 && (
-                    <Chip label={history.length} size="small"
-                      sx={{ height: 18, fontSize: "0.65rem", bgcolor: "rgba(208,188,255,0.2)",
-                            color: "primary.light", ".MuiChip-label": { px: 0.8 } }} />
+                    <Chip label={history.length} size="small" color="primary"
+                      sx={{ height: 18, fontSize: "0.65rem", ".MuiChip-label": { px: 0.8 } }} />
                   )}
                 </Box>
-              } />
+              }
+            />
             <Tab icon={<BarChartIcon fontSize="small" />} iconPosition="start" label="Estadísticas" />
           </Tabs>
-        </AppBar>
 
-        {/* Content */}
-        <Box sx={{ flexGrow: 1, p: 3, overflow: "auto" }}>
+          <Chip
+            icon={<SmartToyIcon sx={{ fontSize: "1rem !important" }} />}
+            label="ML · FastAPI"
+            variant="outlined"
+            size="small"
+            sx={{ borderColor: "#dadce0", color: "#5f6368", display: { xs: "none", sm: "flex" } }}
+          />
+        </Toolbar>
+      </AppBar>
+
+      {/* ── Hero banner ── */}
+      <AnimatePresence>
+        {tab === 0 && (
+          <motion.div key="hero"
+            initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.25 }}>
+            <Box sx={{
+              background: "linear-gradient(135deg, #e8f0fe 0%, #f8f9ff 40%, #e6f4ea 100%)",
+              borderBottom: "1px solid #e8eaed",
+              py: { xs: 4, md: 5 }, px: { xs: 2, md: 4 },
+            }}>
+              <Container maxWidth="lg">
+                <Stack direction={{ xs: "column", md: "row" }}
+                  alignItems={{ md: "center" }} justifyContent="space-between" gap={3}>
+
+                  <Box>
+                    <GDots />
+                    <Typography variant="h4" color="text.primary" sx={{ mb: 0.5 }}>
+                      Detector de Mensajes de Odio
+                    </Typography>
+                    <Typography variant="h6" fontWeight={400} color="text.secondary" sx={{ mb: 2.5 }}>
+                      Análisis inteligente de comentarios de YouTube
+                    </Typography>
+                    <Stack direction="row" gap={1} flexWrap="wrap">
+                      {HERO_CHIPS.map(({ emoji, label }) => (
+                        <Chip key={label}
+                          label={`${emoji}  ${label}`}
+                          size="small"
+                          sx={{
+                            bgcolor: "#fff", border: "1px solid #e8eaed",
+                            color: "#5f6368", fontWeight: 500,
+                            boxShadow: "0 1px 3px rgba(60,64,67,0.08)",
+                          }}
+                        />
+                      ))}
+                    </Stack>
+                  </Box>
+
+                  <Stack direction="row" gap={1.5} flexShrink={0}>
+                    {[
+                      { val: history.length, lbl: "Analizados", color: G_BLUE  },
+                      { val: nToxic,         lbl: "Tóxicos",    color: G_RED   },
+                      { val: nSafe,          lbl: "Seguros",     color: G_GREEN },
+                    ].map(({ val, lbl, color }) => (
+                      <Box key={lbl} sx={{
+                        bgcolor: "#fff", border: "1px solid #e8eaed", borderRadius: 3,
+                        px: 2.5, py: 1.5, textAlign: "center", minWidth: 80,
+                        boxShadow: "0 1px 3px rgba(60,64,67,0.08)",
+                      }}>
+                        <Typography variant="h5" fontWeight={800} sx={{ color }}>{val}</Typography>
+                        <Typography variant="caption" color="text.secondary">{lbl}</Typography>
+                      </Box>
+                    ))}
+                  </Stack>
+                </Stack>
+              </Container>
+            </Box>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Content ── */}
+      <Box sx={{ flexGrow: 1, py: 3, px: { xs: 2, md: 4 } }}>
+        <Container maxWidth="lg">
           <AnimatePresence mode="wait">
             <motion.div key={tab}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: 0.2 }}>
+              initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.2 }}>
               {tab === 0 && <AnalyzeTab onAnalyze={handleAnalyze} />}
               {tab === 1 && (
                 <HistoryTab history={history}
@@ -200,15 +190,28 @@ export default function App() {
               {tab === 2 && <StatsTab history={history} />}
             </motion.div>
           </AnimatePresence>
-        </Box>
+        </Container>
       </Box>
 
-      {/* Global Snackbar */}
-      <Snackbar open={!!snack} autoHideDuration={4500}
-        onClose={() => setSnack(null)}
-        anchorOrigin={{ vertical: "top", horizontal: "right" }}>
+      {/* ── Footer ── */}
+      <Box component="footer" sx={{
+        borderTop: "1px solid #e8eaed", py: 2, px: 4, bgcolor: "#fff",
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+      }}>
+        <Typography variant="caption" color="text.disabled">Proyecto académico · NLP · 2025</Typography>
+        <Stack direction="row" spacing={0.5}>
+          {G_DOTS.map((c, i) => (
+            <Box key={i} sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: c }} />
+          ))}
+        </Stack>
+        <Typography variant="caption" color="text.disabled">React + FastAPI · TF-IDF + Logistic Regression</Typography>
+      </Box>
+
+      {/* ── Snackbar ── */}
+      <Snackbar open={!!snack} autoHideDuration={4500} onClose={() => setSnack(null)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}>
         <Alert onClose={() => setSnack(null)} severity={snack?.severity ?? "info"}
-          variant="filled" sx={{ minWidth: 300, borderRadius: 3 }}>
+          variant="standard" sx={{ minWidth: 320, boxShadow: 4 }}>
           {snack?.msg}
         </Alert>
       </Snackbar>

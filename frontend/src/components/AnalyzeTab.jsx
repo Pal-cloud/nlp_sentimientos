@@ -5,13 +5,15 @@ import {
   ButtonGroup, LinearProgress, Chip, Alert, AlertTitle,
   Collapse, Divider, Tooltip, IconButton,
 } from "@mui/material";
-import SearchIcon          from "@mui/icons-material/Search";
-import CheckCircleIcon     from "@mui/icons-material/CheckCircle";
-import WarningAmberIcon    from "@mui/icons-material/WarningAmber";
-import InfoOutlinedIcon    from "@mui/icons-material/InfoOutlined";
-import CodeIcon            from "@mui/icons-material/Code";
-import ExpandMoreIcon      from "@mui/icons-material/ExpandMore";
-import LightbulbOutlinedIcon from "@mui/icons-material/LightbulbOutlined";
+import {
+  Search as SearchIcon,
+  CheckCircle as CheckCircleIcon,
+  WarningAmber as WarningAmberIcon,
+  InfoOutlined as InfoOutlinedIcon,
+  Code as CodeIcon,
+  ExpandMore as ExpandMoreIcon,
+  LightbulbOutlined as LightbulbOutlinedIcon,
+} from "@mui/icons-material";
 import { TYPE_CONFIG, EXAMPLES } from "../constants";
 
 const TYPE_DESCRIPTIONS = {

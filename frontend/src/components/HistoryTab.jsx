@@ -11,11 +11,13 @@ import {
   Tooltip,
   Alert,
 } from "@mui/material";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import FileDownloadIcon from "@mui/icons-material/FileDownload";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import WarningAmberIcon from "@mui/icons-material/WarningAmber";
-import HistoryIcon from "@mui/icons-material/History";
+import {
+  DeleteOutlined as DeleteOutlineIcon,
+  FileDownload as FileDownloadIcon,
+  CheckCircle as CheckCircleIcon,
+  WarningAmber as WarningAmberIcon,
+  History as HistoryIcon,
+} from "@mui/icons-material";
 import { toast } from "react-hot-toast";
 
 export default function HistoryTab({ history, onClear }) {
