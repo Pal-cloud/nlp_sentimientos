@@ -22,12 +22,24 @@ VECTORIZER_PATH = os.path.join(BASE_DIR, "models", "tfidf_vectorizer.pkl")
 model      = joblib.load(MODEL_PATH)
 vectorizer = joblib.load(VECTORIZER_PATH)
 
+import os
+
 # ── App ────────────────────────────────────────────────────────────────────────
 app = FastAPI(title="Hate Speech Detector API", version="1.0.0")
 
+# Allow localhost for dev + any Vercel/Render domain for production.
+# ALLOWED_ORIGINS env var can be a comma-separated list of extra origins.
+_extra = os.getenv("ALLOWED_ORIGINS", "")
+_origins = [
+    "http://localhost:5173",
+    "http://localhost:3000",
+    *[o.strip() for o in _extra.split(",") if o.strip()],
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000"],
+    allow_origins=_origins,
+    allow_origin_regex=r"https://.*\.vercel\.app",  # all Vercel preview URLs
     allow_methods=["*"],
     allow_headers=["*"],
 )
