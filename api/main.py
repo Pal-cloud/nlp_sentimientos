@@ -43,7 +43,7 @@ class AnalyzeResponse(BaseModel):
     toxic: bool
     confidence: float   # 0.0 – 1.0
     confidence_pct: int # 0 – 100
-    toxicity_type: str  # machista | racista | sexual | insulto | lenguaje cotidiano
+    toxicity_type: str  # machista | racista | sexual | insulto | homofobo | politico | lenguaje cotidiano
     cleaned_text: str
 
 

@@ -92,6 +92,20 @@ _KEYWORDS = {
         "freak", "pathetic", "worthless", "die", "kill", "hate", "disgusting",
         "shut up", "fool", "scum",
     ],
+    "homofobo": [
+        "gay", "homosexual", "maricón", "marica", "maricon", "lesbiana",
+        "travesti", "transexual", "trans", "lgbtq", "sodomia", "invertido",
+        "aberración", "perversión", "degenerado", "anormal", "enfermo",
+        "queer", "faggot", "dyke", "homo", "tranny", "pervert",
+        "unnatural", "deviant", "disgusting gay", "abomination",
+    ],
+    "politico": [
+        "fascista", "comunista", "dictadura", "golpista", "traidor", "corrupto",
+        "gobierno corrupto", "politico ladrón", "tirano", "usurpador",
+        "socialismo", "capitalismo salvaje", "extremista", "terrorista",
+        "fascism", "communist", "dictator", "traitor", "corrupt government",
+        "propaganda", "extremist", "radical", "coup", "tyrant",
+    ],
 }
 
 
@@ -99,7 +113,7 @@ def classify_toxicity_type(text: str) -> str:
     """
     Classifies the toxicity type using an ML pipeline when available,
     falling back to keyword matching.
-    Returns: 'machista', 'racista', 'sexual', 'insulto' or 'lenguaje cotidiano'.
+    Returns: 'machista', 'racista', 'sexual', 'insulto', 'homofobo', 'politico' or 'lenguaje cotidiano'.
     """
     pipeline = _load_type_pipeline()
     if pipeline is not None:

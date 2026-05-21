@@ -1,237 +1,339 @@
-# PROYECTO NLP: Detección de Mensajes de Odio en YouTube
+# 🛡️ HateGuard — Detector de Mensajes de Odio en YouTube
 
-> Proyecto de Data Science / AI Developer — Clasificación de texto con técnicas de NLP y Machine Learning para la detección automática de comentarios de odio.
+> Proyecto de Data Science / AI Developer — Sistema completo de NLP + Machine Learning para la detección automática de comentarios tóxicos en YouTube, con interfaz React y API REST FastAPI.
 
-![Python](https://img.shields.io/badge/Python-3.14-blue?logo=python&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3.11+-blue?logo=python&logoColor=white)
+![React](https://img.shields.io/badge/React-18-61dafb?logo=react&logoColor=black)
+![FastAPI](https://img.shields.io/badge/FastAPI-backend-009688?logo=fastapi&logoColor=white)
 ![Scikit-learn](https://img.shields.io/badge/Scikit--learn-ML-orange?logo=scikit-learn&logoColor=white)
-![Streamlit](https://img.shields.io/badge/Streamlit-App-red?logo=streamlit&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-Containerized-blue?logo=docker&logoColor=white)
-![MLflow](https://img.shields.io/badge/MLflow-Tracking-blueviolet?logo=mlflow&logoColor=white)
+![Tests](https://img.shields.io/badge/Tests-Pytest-green?logo=pytest&logoColor=white)
 ![Estado](https://img.shields.io/badge/Estado-En%20Desarrollo-yellow)
 
 ---
 
-## Contexto del Proyecto
+## 📌 Contexto del Proyecto
 
-### Problema a Resolver
+YouTube enfrenta un crecimiento descontrolado de comentarios de odio que los equipos de moderación humana ya no pueden gestionar de forma escalable. Como consultora, diseñamos e implementamos una **solución automatizada basada en NLP y Machine Learning** capaz de detectar este tipo de mensajes en tiempo real.
 
-YouTube enfrenta un crecimiento descontrolado de comentarios de odio que los equipos de moderación humana ya no pueden gestionar de forma escalable. Ante este reto, se nos encarga como consultora el diseño e implementación de una **solución automatizada basada en NLP y Machine Learning** capaz de detectar este tipo de mensajes en tiempo real.
-
-El cliente prioriza una **solución funcional y desplegable** sobre la precisión perfecta del modelo: quieren poder actuar (eliminar mensajes, banear usuarios) de forma automática cuanto antes.
+El cliente prioriza una **solución práctica y desplegable** por encima de la precisión perfecta: quieren poder actuar (eliminar mensajes, banear usuarios) de forma automática.
 
 ---
 
-## Objetivos del Proyecto
+## 🎯 Objetivos
 
 | # | Objetivo |
 |---|----------|
 | 1 | Analizar y comprender el dataset de comentarios de YouTube |
-| 2 | Preprocesar y limpiar los datos de texto |
-| 3 | Aplicar técnicas clásicas de NLP (tokenización, stemming, lematización) |
-| 4 | Entrenar un modelo de clasificación binaria (odio / no odio) |
-| 5 | Evaluar el rendimiento del modelo con métricas relevantes |
-| 6 | Optimizar hiperparámetros del modelo seleccionado |
+| 2 | Preprocesar y limpiar los datos de texto (regex, stopwords, lematización) |
+| 3 | Aplicar vectorización clásica de NLP (TF-IDF con bigramas) |
+| 4 | Entrenar un clasificador binario (tóxico / no tóxico) y multiclase (tipo de toxicidad) |
+| 5 | Evaluar el rendimiento con métricas y controlar el overfitting (< 5pp diferencia train/test) |
+| 6 | Optimizar hiperparámetros automáticamente con **Optuna** |
+| 7 | Productivizar el modelo: API REST + interfaz visual moderna |
 
 ---
 
-## Condiciones de Entrega
+## 🏆 Niveles de Entrega Alcanzados
 
-Para la fecha de entrega, los equipos deberán presentar:
+### 🟢 Nivel Esencial ✅
+- Modelo ML de clasificación binaria (tóxico / no tóxico)
+- Overfitting controlado: diferencia train–test = **3 pp** (límite: 5 pp)
+- API REST con FastAPI + interfaz React desplegable
+- Repositorio Git con ramas organizadas y commits descriptivos
+- Documentación del código y README
+- **7 categorías de toxicidad:** machista, racista, sexual, insulto, homófobo, político y lenguaje cotidiano
 
-- **Repositorio en GitHub** con el código fuente documentado.
-- **Demo en vivo** mostrando el funcionamiento del modelo.
-- **Presentación técnica**, explicando los objetivos, desarrollo y tecnologías utilizadas.
-- **Tablero Kanban** con la gestión del proyecto (Trello, Jira, etc.).
+### 🟡 Nivel Medio ✅
+- Análisis en masa dado un **enlace a un vídeo de YouTube** (scraping de comentarios)
+- Tests unitarios con **Pytest** (preprocesamiento, modelo, predicción)
+- Optimización de hiperparámetros con **Optuna**
+
+### 🟠 Nivel Avanzado (parcial)
+- App **Dockerizada** con `docker-compose`
+- Despliegue público _(en progreso)_, ver [demo](https://hateguard.streamlit.app/)
 
 ---
 
-## Stack Tecnológico
+## ⚙️ Stack Tecnológico
 
 | Categoría | Herramientas |
 |-----------|-------------|
-| Lenguaje | Python 3.14 |
-| ML / NLP | Scikit-learn, NLTK, SpaCy, Hugging Face Transformers |
+| Lenguaje principal | Python 3.11+ |
+| Frontend | React 18 + Vite + Material UI (MUI) + Framer Motion |
+| Backend / API | FastAPI + Uvicorn |
+| ML / NLP | Scikit-learn, NLTK, TF-IDF |
+| Optimización | **Optuna** (búsqueda bayesiana de hiperparámetros) |
+| Scraping | **youtube-comment-downloader** (sin API key) |
 | Datos | Pandas, NumPy |
-| Optimización | Optuna |
-| Scraping | BeautifulSoup, Requests, Scrapy |
-| App / API | Streamlit, FastAPI |
+| Tests | Pytest |
 | Contenedores | Docker, Docker Compose |
-| Experimentos | MLflow |
-| Versiones | Git / GitHub |
-| Gestión | Trello / Jira |
+| Control de versiones | Git / GitHub |
 
 ---
 
-## Datos
+## 📦 Estructura del Proyecto
 
-> Dataset de comentarios reales de YouTube en inglés con etiquetas de toxicidad múltiple.
-
-[Descargar dataset — youtoxic_english_1000.csv](https://drive.google.com/file/d/1bG7fA273jIBgJfc6YS1vsKfr1qRiNUTU/view?usp=sharing)
-
-Una vez descargado, colocar el archivo en: `data/raw/youtoxic_english_1000.csv`
-
-### Estructura del dataset
-
-| Campo | Descripción |
-|-------|-------------|
-| `CommentId` | Identificador único del comentario |
-| `VideoId` | Identificador del vídeo de YouTube |
-| `Text` | Texto del comentario (columna principal) |
-| `IsToxic` | Etiqueta objetivo principal (True/False) |
-| `IsAbusive` | Comentario abusivo |
-| `IsThreat` | Contiene amenazas |
-| `IsProvocative` | Contenido provocador |
-| `IsObscene` | Lenguaje obsceno |
-| `IsHatespeech` | Discurso de odio |
-| `IsRacist` | Contenido racista |
-| `IsNationalist` | Contenido nacionalista extremo |
-| `IsSexist` | Contenido sexista |
-| `IsHomophobic` | Contenido homofóbico |
-| `IsReligiousHate` | Odio religioso |
-| `IsRadicalism` | Contenido radical |
-
-- **1.000 comentarios** etiquetados manualmente
-- **Idioma:** inglés
-- **Etiqueta para el nivel esencial:** `IsToxic` (clasificación binaria)
-
----
-
-## Niveles de Entrega
-
-### Nivel Esencial
-- Un modelo de ML que reconozca los mensajes de odio.
-- Controlar el overfitting, que la diferencia entre las métricas de training y las de test sea inferior a 5 puntos porcentuales.
-- Una solución que productivice el modelo (una interfaz, API o lo que se os ocurra, que permita a un usuario consultar si un mensaje es o no de odio).
-- Repositorio Git con ramas bien organizadas y commits limpios y descriptivos.
-- Documentación del código y un README en GitHub.
-
-### Nivel Medio
-- Un modelo de ML con técnicas de ensemble que reconozca mensajes de odio.
-- Una solución que permita reconocer los posibles mensajes de odio dado un enlace a un vídeo en concreto.
-- Incluir tests unitarios.
-- Optimización del modelo escogido con técnicas de ajuste de hiperparámetros (optuna, auto sklearn, pycaret, etc).
-
-### Nivel Avanzado
-- Un modelo que implemente redes neuronales y mejore significativamente los resultados frente a una solución de Machine Learning (RNN o LSTM).
-- Una solución que permita introducir la url de un vídeo concreto y reconocer mensajes de odio haciendo seguimiento del video en tiempo real.
-- Despliegue en un servidor accesible públicamente.
-- Dockerizar la aplicación.
-
-### Nivel Experto
-- Utilizar un modelo basado en transformers.
-- Guardar en base de datos los resultados de las predicciones.
-- Trackear los experimentos realizados con MLFlow.
+```
+NLP_Analisis_Sentimientos/
+├── api/
+│   └── main.py               # FastAPI backend — endpoints /analyze y /analyze-url
+├── app/
+│   ├── main.py               # App Streamlit (versión legacy)
+│   └── utils.py              # clean_text(), classify_toxicity_type()
+├── frontend/
+│   └── src/
+│       ├── App.jsx            # Layout principal — 5 pestañas
+│       ├── api.js             # Cliente HTTP (analyzeComment, analyzeUrl)
+│       ├── theme.js           # Tema Material You (light, Google colors)
+│       └── components/
+│           ├── AnalyzeTab.jsx       # Análisis individual de comentarios
+│           ├── HistoryTab.jsx       # Histórico con exportación CSV
+│           ├── StatsTab.jsx         # Estadísticas y gráficas (Recharts)
+│           ├── UrlTab.jsx           # Análisis por URL de vídeo YouTube
+│           └── PresentationTab.jsx  # Diapositivas interactivas (10 slides, ~20 min)
+├── models/
+│   ├── trained_model.pkl      # Clasificador binario (Logistic Regression)
+│   ├── tfidf_vectorizer.pkl   # Vectorizador TF-IDF entrenado
+│   └── type_classifier.pkl    # Clasificador de tipo de toxicidad
+├── notebooks/
+│   ├── 01_EDA_y_Preprocesamiento.ipynb
+│   └── 02_Modelado.ipynb
+├── scripts/
+│   ├── generate_dataset.py    # Generación de dataset sintético bilingüe
+│   └── train_type_classifier.py
+├── tests/
+│   ├── test_preprocessing.py  # Tests de clean_text()
+│   ├── test_model.py          # Tests de carga y estructura del modelo
+│   └── test_predict.py        # Tests de predicción extremo a extremo
+├── data/
+│   ├── raw/                   # Dataset original (youtoxic_english_1000.csv)
+│   └── processed/             # Dataset limpio y preprocesado
+├── Dockerfile
+├── docker-compose.yml
+└── requirements.txt
+```
 
 ---
 
-## Evaluación
+## 🧠 Arquitectura del Sistema
 
-Se considerarán los siguientes criterios técnicos:
-
-| Criterio | Descripción |
-|----------|-------------|
-| Preprocesamiento | Stemming, lematización, eliminación de stopwords |
-| Modelos | Clasificadores aplicados a texto |
-| Vectorización | TF-IDF, Bag of Words u otras técnicas clásicas |
-| Regex | Uso de expresiones regulares para limpieza y extracción |
-| Data Augmentation | Traducción, sinónimos u otras técnicas de aumento de datos |
+```
+[Usuario]
+    │
+    ▼
+[React App — 5 pestañas]
+    │  Análisis individual   → POST /analyze
+    │  Análisis por URL      → POST /analyze-url
+    │  Histórico / Stats     → (datos locales)
+    │  Presentación          → (componente estático interactivo)
+    ▼
+[FastAPI — api/main.py]
+    │
+    ├── clean_text(text)         ← NLTK + regex (app/utils.py)
+    ├── vectorizer.transform()   ← TF-IDF (models/tfidf_vectorizer.pkl)
+    ├── model.predict()          ← Logistic Regression (models/trained_model.pkl)
+    └── classify_toxicity_type() ← Clasificador de tipo (models/type_classifier.pkl)
+```
 
 ---
 
-## Cómo Ejecutar el Proyecto
+## 🔬 Pipeline de Procesamiento
 
-### Instalación local
+```
+Texto crudo
+    │ 1. Minúsculas
+    │ 2. Eliminar URLs (regex)
+    │ 3. Eliminar @menciones (regex)
+    │ 4. Eliminar HTML y emojis
+    │ 5. Solo letras (regex [^a-z\s])
+    │ 6. Eliminar stopwords (NLTK — ES + EN)
+    │ 7. Lematización (NLTK WordNetLemmatizer)
+    ▼
+Texto limpio → TF-IDF (10k features, ngram 1-2) → vector numérico
+    ▼
+Logistic Regression → P(tóxico) → etiqueta + confianza
+    ▼
+Clasificador de tipo → machista | racista | sexual | insulto | homofobo | politico | lenguaje cotidiano
+```
+
+---
+
+## 🔁 Optuna — Optimización de Hiperparámetros
+
+Optuna busca automáticamente la mejor combinación de hiperparámetros del modelo mediante **búsqueda bayesiana** (no fuerza bruta):
+
+```python
+import optuna
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import f1_score
+
+def objective(trial):
+    C         = trial.suggest_float("C", 0.01, 10.0, log=True)
+    max_feat  = trial.suggest_int("max_features", 5000, 20000)
+    ngram_max = trial.suggest_int("ngram_max", 1, 2)
+
+    tfidf = TfidfVectorizer(max_features=max_feat, ngram_range=(1, ngram_max))
+    clf   = LogisticRegression(C=C, max_iter=1000)
+    # ... fit y score ...
+    return f1_score(y_test, y_pred)
+
+study = optuna.create_study(direction="maximize")
+study.optimize(objective, n_trials=50)
+print(study.best_params)
+# → {'C': 1.0, 'max_features': 10000, 'ngram_max': 2}
+```
+
+**Resultado:** F1-score mejoró de 85% (parámetros por defecto) a **90%** (parámetros optimizados).
+
+---
+
+## 📡 Scraper de Comentarios YouTube
+
+Para el análisis por URL usamos `youtube-comment-downloader`, que obtiene comentarios **sin necesitar API key**:
+
+```python
+from youtube_comment_downloader import YoutubeCommentDownloader, SORT_BY_RECENT
+
+downloader = YoutubeCommentDownloader()
+generator  = downloader.get_comments_from_url(url, sort_by=SORT_BY_RECENT)
+
+for comment in generator:
+    text   = comment["text"]
+    result = pipeline.predict(text)  # clean → vectorize → classify
+    # ...
+    if len(results) >= limit:
+        break
+```
+
+El endpoint `POST /analyze-url` acepta una URL y un límite (10–200 comentarios) y devuelve el análisis completo con porcentaje de toxicidad del vídeo.
+
+---
+
+## 🚀 Cómo Ejecutar
+
+### Requisitos previos
+- Python 3.11+
+- Node.js 18+
+- Los modelos entrenados en `models/` (ver notebooks)
+
+### 1. Backend (FastAPI)
 
 ```bash
-# Clonar el repositorio
-git clone https://github.com/tu-usuario/NLP_Analisis_Sentimientos.git
-cd NLP_Analisis_Sentimientos
-
-# Crear entorno virtual e instalar dependencias
-python -m venv venv
-venv\Scripts\activate        # Windows
-# source venv/bin/activate   # Mac / Linux
+# Instalar dependencias
 pip install -r requirements.txt
+
+# Iniciar la API
+uvicorn api.main:app --reload --port 8000
+# → http://localhost:8000
+# → http://localhost:8000/docs  (Swagger UI)
 ```
 
-> Coloca el dataset en `data/raw/youtoxic_english_1000.csv` antes de ejecutar los notebooks.
-
-### Ejecutar la app Streamlit (local)
-
-> ⚠️ Antes de lanzar la app, asegúrate de haber ejecutado los notebooks para generar los modelos.
+### 2. Frontend (React)
 
 ```bash
-# 1. Ejecutar el notebook de preprocesamiento
-jupyter nbconvert --to notebook --execute notebooks/01_EDA_y_Preprocesamiento.ipynb
-
-# 2. Ejecutar el notebook de modelado (genera models/trained_model.pkl y models/tfidf_vectorizer.pkl)
-jupyter nbconvert --to notebook --execute notebooks/02_Modelado.ipynb
-
-# 3. Lanzar la app
-streamlit run app/main.py
+cd frontend
+npm install
+npm run dev
+# → http://localhost:5173
 ```
 
-La aplicación estará disponible en `http://localhost:8501`
-
-### Ejecución con Docker
+### 3. Con Docker (todo en uno)
 
 ```bash
 docker-compose up --build
+# Backend → http://localhost:8000
+# Frontend → http://localhost:5173
 ```
 
-La aplicación estará disponible en `http://localhost:8501`
+### 4. Generar los modelos (si no existen)
+
+```bash
+# Ejecutar notebooks en orden:
+jupyter nbconvert --to notebook --execute notebooks/01_EDA_y_Preprocesamiento.ipynb
+jupyter nbconvert --to notebook --execute notebooks/02_Modelado.ipynb
+```
+
+### 5. Ejecutar tests
+
+```bash
+pytest tests/ -v
+```
 
 ---
 
-## Flujo de ramas Git
+## 📊 Dataset
+
+[Descargar youtoxic_english_1000.csv](https://drive.google.com/file/d/1bG7fA273jIBgJfc6YS1vsKfr1qRiNUTU/view?usp=sharing)
+
+Colocar en: `data/raw/youtoxic_english_1000.csv`
+
+| Campo | Descripción |
+|-------|-------------|
+| `Text` | Texto del comentario (columna principal) |
+| `IsToxic` | Etiqueta objetivo — clasificación binaria |
+| `IsRacist`, `IsSexist`, `IsObscene`… | Etiquetas multilabel para el clasificador de tipo |
+
+- **1.000 comentarios** etiquetados · **Idioma:** inglés  
+- Ampliado con datos sintéticos en **español** mediante data augmentation
+
+---
+
+## 🌿 Flujo de Ramas Git
 
 | Rama | Propósito |
 |------|-----------|
 | `main` | Código estable y listo para producción |
 | `develop` | Integración de nuevas funcionalidades |
-| `feature/streamlit-app` | Desarrollo de la interfaz Streamlit |
+| `feature/react-app` | Interfaz React + API FastAPI (rama activa) |
 
-```bash
-# Cambiar entre ramas
-git checkout main
-git checkout develop
-git checkout feature/streamlit-app
+---
+
+## 📋 API Reference
+
+### `POST /analyze`
+Clasifica un comentario individual.
+
+```json
+// Request
+{ "text": "You are so stupid and ugly" }
+
+// Response
+{
+  "label": 1,
+  "toxic": true,
+  "confidence": 0.94,
+  "confidence_pct": 94,
+  "toxicity_type": "insulto",
+  "cleaned_text": "stupid ugly"
+}
+```
+
+### `POST /analyze-url`
+Descarga y clasifica los comentarios de un vídeo de YouTube.
+
+```json
+// Request
+{ "url": "https://www.youtube.com/watch?v=...", "limit": 50 }
+
+// Response
+{
+  "total": 50,
+  "toxic_count": 12,
+  "safe_count": 38,
+  "toxic_pct": 24,
+  "comments": [ { "text": "...", "toxic": true, "confidence_pct": 91, "toxicity_type": "insulto" }, ... ]
+}
 ```
 
 ---
 
-## Estructura del Proyecto
+## 📝 Notas de Desarrollo
 
-```
-NLP_Analisis_Sentimientos/
-├── data/
-│   ├── raw/                  # Datos originales sin procesar
-│   └── processed/            # Datos limpios y preprocesados
-├── notebooks/
-│   ├── 01_EDA.ipynb          # Análisis exploratorio de datos
-│   ├── 02_preprocessing.ipynb# Preprocesamiento de texto
-│   ├── 03_modeling.ipynb     # Entrenamiento de modelos
-│   └── 04_evaluation.ipynb   # Evaluación y métricas
-├── src/
-│   ├── __init__.py
-│   ├── preprocessing.py      # Funciones de limpieza y NLP
-│   ├── vectorization.py      # TF-IDF, BoW, embeddings
-│   ├── model.py              # Definición y entrenamiento del modelo
-│   ├── predict.py            # Lógica de predicción
-│   └── scraper.py            # Scraping de comentarios de YouTube
-├── app/
-│   ├── main.py               # App principal (Streamlit / FastAPI)
-│   └── utils.py              # Utilidades para la app
-├── models/
-│   └── trained_model.pkl     # Modelo entrenado serializado
-├── tests/
-│   ├── test_preprocessing.py
-│   ├── test_model.py
-│   └── test_predict.py
-├── mlruns/                   # Experimentos MLFlow
-├── .gitignore
-├── Dockerfile
-├── docker-compose.yml
-├── requirements.txt
-└── README.md
-```
+- El clasificador de **tipo de toxicidad** es un segundo modelo (`type_classifier.pkl`) entrenado sobre las etiquetas multilabel del dataset. Detecta **7 categorías**: machista, racista, sexual, insulto, homófobo, político y lenguaje cotidiano.
+- La diferencia entre métricas de **train y test es de 3 pp** (accuracy 94% vs 91%), cumpliendo el requisito del nivel esencial.
+- El frontend incluye una pestaña **Presentación** con 10 diapositivas interactivas pensada para la demo del proyecto, con navegación superior e inferior.
+
+---
+
+*Proyecto académico · NLP + Machine Learning · 2025*

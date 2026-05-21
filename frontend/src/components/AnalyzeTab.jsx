@@ -21,6 +21,8 @@ const TYPE_DESCRIPTIONS = {
   racista:              "Contenido basado en raza, etnia o nacionalidad",
   sexual:               "Contenido sexual explícito o acoso sexual",
   insulto:              "Insultos directos, amenazas o lenguaje agresivo",
+  homofobo:             "Odio o discriminación hacia personas LGBTQ+",
+  politico:             "Discurso de odio con motivación o contenido político",
   "lenguaje cotidiano": "Sin categoría tóxica específica detectada",
 };
 
