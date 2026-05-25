@@ -206,14 +206,13 @@ with tab_analyze:
 
     with col_input:
         st.subheader("✍️ Introduce un comentario")
-        default_val = st.session_state["example_text"]
+        default_val = st.session_state.get("example_text", "")
         user_text = st.text_area(
             label="Comentario",
             value=default_val,
             placeholder="Escribe aquí el comentario de YouTube que quieres analizar...",
             height=190,
             label_visibility="collapsed",
-            key="main_textarea",
         )
 
         ex1, ex2 = st.columns(2)
@@ -233,7 +232,8 @@ with tab_analyze:
         analyze_btn = st.button(
             "🔍 Analizar comentario", type="primary", use_container_width=True
         )
-        if st.session_state["example_text"] and user_text == st.session_state["example_text"]:
+        # Reset example after it has been loaded into the textarea
+        if st.session_state.get("example_text") and user_text == st.session_state["example_text"]:
             st.session_state["example_text"] = ""
 
     with col_result:

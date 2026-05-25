@@ -156,26 +156,46 @@ pip install -r requirements.txt
 
 > Coloca el dataset en `data/raw/youtoxic_english_1000.csv` antes de ejecutar los notebooks.
 
-### Ejecutar la app Streamlit (local)
+---
 
-> ⚠️ Antes de lanzar la app, asegúrate de haber ejecutado los notebooks para generar los modelos.
+## Estructura de Ramas — Dos Interfaces
+
+Este proyecto cuenta con **dos interfaces independientes** alojadas en ramas distintas:
+
+| Rama | Interfaz | Tecnología | Despliegue |
+|------|----------|-----------|------------|
+| `feature/streamlit-app` | App legacy (actual por defecto) | Streamlit | Docker / local |
+| `main` | App moderna | React + FastAPI | Vercel (frontend) + Render (backend) |
+| `develop` | Integración | — | — |
+
+> **Regla general:** para la demo Streamlit usa `feature/streamlit-app`; para la demo React+FastAPI usa `main`.
+
+---
+
+### 🐍 App Streamlit (`feature/streamlit-app`)
+
+La interfaz más completa para uso académico/demo local: análisis individual, histórico y estadísticas.
 
 ```bash
-# 1. Ejecutar el notebook de preprocesamiento
-jupyter nbconvert --to notebook --execute notebooks/01_EDA_y_Preprocesamiento.ipynb
+# Cambiar a la rama correcta
+git checkout feature/streamlit-app
 
-# 2. Ejecutar el notebook de modelado (genera models/trained_model.pkl y models/tfidf_vectorizer.pkl)
+# 1. (Primera vez) Ejecutar notebooks para generar los modelos
+jupyter nbconvert --to notebook --execute notebooks/01_EDA_y_Preprocesamiento.ipynb
 jupyter nbconvert --to notebook --execute notebooks/02_Modelado.ipynb
 
-# 3. Lanzar la app
+# 2. Lanzar la app
 streamlit run app/main.py
 ```
 
 La aplicación estará disponible en `http://localhost:8501`
 
-### Ejecución con Docker
+> Los archivos `.pkl` del modelo ya están incluidos en la rama, por lo que puedes saltar el paso 1 si no modificas el modelo.
+
+#### Ejecución con Docker (Streamlit)
 
 ```bash
+git checkout feature/streamlit-app
 docker-compose up --build
 ```
 
@@ -183,19 +203,56 @@ La aplicación estará disponible en `http://localhost:8501`
 
 ---
 
+### ⚛️ App React + FastAPI (`main`)
+
+Interfaz moderna desplegada públicamente en Vercel + Render.
+
+```bash
+git checkout main
+```
+
+**Backend (FastAPI)**
+
+```bash
+pip install -r requirements.txt
+uvicorn app.api:app --reload --port 8000
+```
+
+**Frontend (React + Vite)**
+
+```bash
+cd frontend
+npm install
+# Crea un archivo .env.local con la URL del backend:
+echo "VITE_API_URL=http://localhost:8000" > .env.local
+npm run dev
+```
+
+La aplicación estará disponible en `http://localhost:5173`
+
+#### Despliegue en la nube
+
+| Servicio | Rama | Configuración |
+|----------|------|---------------|
+| **Render** (backend) | `main` | Build: `pip install -r requirements.txt` · Start: `uvicorn app.api:app --host 0.0.0.0 --port $PORT` |
+| **Vercel** (frontend) | `main` | Root: `frontend/` · Framework: Vite · Env var: `VITE_API_URL=<URL de Render>` |
+
+---
+
 ## Flujo de ramas Git
 
-| Rama | Propósito |
-|------|-----------|
-| `main` | Código estable y listo para producción |
-| `develop` | Integración de nuevas funcionalidades |
-| `feature/streamlit-app` | Desarrollo de la interfaz Streamlit |
+```
+main ◄──── develop ◄──── feature/streamlit-app
+ │                              │
+ │  React + FastAPI             │  Streamlit App
+ │  (Vercel + Render)           │  (Docker / local)
+```
 
 ```bash
 # Cambiar entre ramas
-git checkout main
-git checkout develop
-git checkout feature/streamlit-app
+git checkout main                    # App React + FastAPI
+git checkout develop                 # Rama de integración
+git checkout feature/streamlit-app   # App Streamlit
 ```
 
 ---
